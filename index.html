@@ -1,10 +1,3 @@
-Understood — let's make this impossible to get wrong. Before the code, one crucial thing to check, because it's my prime suspect:
-
-**If you're testing the file inside a preview pane** (a chat preview window, an IDE's "preview" tab, an online HTML runner), the page runs in a **sandboxed frame where the browser blocks localStorage entirely** — every load gets a brand-new empty storage that dies with the frame. No JavaScript can fix that; it's a security rule. **Download the file and open it directly in a normal browser tab** (double-click it, or use VS Code Live Server) — that's where persistence works.
-
-The rebuilt file below now *tells you* which situation you're in: a red banner appears at the top the moment storage is blocked, the admin pill flips from "Saved locally" to "Not persisting", and one console line prints `Storage: OK` or `Storage: BLOCKED`. I've also fixed a second real data-loss path I found: **two tabs open at once** could overwrite each other's saves — the build now syncs between tabs automatically, and there's an Export/Import backup in Admin → Data as a safety net.
-
-```html
 <!DOCTYPE html>
 <!-- ============================================================
   BILAL INTERIOR — SPA (persistence-hardened build)
@@ -1620,21 +1613,3 @@ The rebuilt file below now *tells you* which situation you're in: a red banner a
 </html>
 ```
 
-**Do this exactly, in order (5 minutes):**
-
-1. **Save the code above as `index.html`** — replacing your old copy.
-2. **Open it in a normal browser tab** — double-click the file, or use Live Server. If you were testing inside a preview pane, this step alone is your fix.
-3. **Check the console** (F12): you'll see either `[Bilal Interior] Storage: OK — changes will persist` or `Storage: BLOCKED`. If it says BLOCKED, the environment is preventing saves — no code can override that; move the file to a different way of opening (step 2).
-4. Open admin → rename "Sofas" → **View Site** → confirm the nav shows the new name.
-5. **Fully close the tab, reopen the same way** → the rename is still there. ✅
-
-**Common pitfalls that cause exactly your symptom:**
-
-- Opening it once via double-click (`file://…`) and later via Live Server (`127.0.0.1:5500`) — those are *different storage buckets*. Note `localhost` and `127.0.0.1` are different origins too. Pick one method and always use it.
-- Incognito/private windows wipe everything on close.
-- Chrome's "Clear cookies and site data when you close all windows" setting (Privacy → Third-party cookies → All time).
-- Having the site open in **two tabs** — the old version now syncs instead of overwriting, but closing extra tabs is still tidier.
-
-**Safety net:** even in the worst environment, Admin → Data → **Export Backup** downloads your entire catalog as JSON, and **Import Backup** restores it anywhere — so your work is never trapped.
-
-If step 3 shows `Storage: OK` and step 5 *still* loses your rename, tell me the exact URL from the address bar and your browser + OS, and I'll pin it down from there.
