@@ -1455,13 +1455,3 @@
 </html>
 ```
 
-**How the architecture works**
-
-- **SPA routing.** Hash-based router (`#/`, `#/shop/all`, `#/shop/<categoryId>`, `#/about`, `#/contact`) with a short fade transition on every view swap. The back/forward buttons work, category links are deep-linkable, and the header nav, mobile menu, and footer links are all generated from live state — renaming "Sofas" to "Modern Sofas" in admin instantly updates every link on the site. If a route points to a deleted category, it silently falls back to All Products.
-- **Shoppable hero.** The hero render carries pulsing hotspot markers mapped to real product IDs (deleted products simply drop their hotspot). "Shop the Look" opens a lookbook modal of the tagged pieces; hotspots jump straight to that product's quick view with the prefilled WhatsApp inquiry.
-- **Chat concierge.** Floating widget with typing indicator, timestamps, keyword-based replies (price → private-quoting explainer, delivery, hours, materials, etc.), and full history persisted to `localStorage` — returning visitors see their previous conversation. Clearing is two-step, both in the widget and in the admin Data tab.
-- **Admin panel.** Opened via the near-invisible "Studio" link in the footer bottom bar (or 5 clicks on the copyright), passphrase `admin123` with a 30-second lockout after 3 failures. **Categories tab:** add, inline-rename (Enter to save, Esc to cancel), and two-step delete — renaming keeps product assignments intact because products reference category *IDs*; deleting orphans its products, which show as "No category" chips in the product list, ready to be reassigned, and the delete is undoable. **Products tab:** Title / Category / Image URL / Description with live image preview. **Branding tab:** logo (text + optional image URL with live preview), WhatsApp number, email, address, hours. **Data tab:** conversation stats, guarded chat clear, passphrase change, and a guarded full reset.
-- **No prices anywhere.** The data model has no price field; cards, quick view, and the lookbook all route quoting to WhatsApp with the exact message *"Hello Bilal Interior, I am interested in your design: [Item Title]. Can you provide more details?"*
-- **Pre-loaded & resilient.** Sixteen seeded products across the five requested categories, every image with an `onerror` picsum fallback, and all mutations written through to `localStorage` (`bilal_interior_spa_v1`) so edits appear on the live site instantly and survive refreshes.
-
-Save as `index.html` and open it — try the hero hotspots, send the concierge a message, then refresh to see the chat history persist, and open the admin via the footer's "Studio" link.
