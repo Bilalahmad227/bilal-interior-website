@@ -1,4 +1,21 @@
+Understood — let's make this impossible to get wrong. Before the code, one crucial thing to check, because it's my prime suspect:
+
+**If you're testing the file inside a preview pane** (a chat preview window, an IDE's "preview" tab, an online HTML runner), the page runs in a **sandboxed frame where the browser blocks localStorage entirely** — every load gets a brand-new empty storage that dies with the frame. No JavaScript can fix that; it's a security rule. **Download the file and open it directly in a normal browser tab** (double-click it, or use VS Code Live Server) — that's where persistence works.
+
+The rebuilt file below now *tells you* which situation you're in: a red banner appears at the top the moment storage is blocked, the admin pill flips from "Saved locally" to "Not persisting", and one console line prints `Storage: OK` or `Storage: BLOCKED`. I've also fixed a second real data-loss path I found: **two tabs open at once** could overwrite each other's saves — the build now syncs between tabs automatically, and there's an Export/Import backup in Admin → Data as a safety net.
+
+```html
 <!DOCTYPE html>
+<!-- ============================================================
+  BILAL INTERIOR — SPA (persistence-hardened build)
+  HOW TO RUN so your saves stick:
+  1. Save this file as index.html
+  2. Open it directly in Chrome / Edge / Firefox (double-click it,
+     or via VS Code Live Server) — always the SAME way/URL.
+  3. Do NOT rely on chat/IDE preview panes: they sandbox the page
+     and the browser blocks storage there. A red banner will warn
+     you if that happens.
+============================================================ -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -232,7 +249,6 @@
     <div class="mt-16 pt-8 border-t border-cream/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[10.5px] tracking-[0.18em] uppercase text-cream/40">
       <div class="flex items-center gap-4">
         <p id="copyright" class="cursor-pointer select-none">© 2025 Bilal Interior — All rights reserved</p>
-        <!-- Hidden admin entry -->
         <button id="adminLink" class="opacity-20 hover:opacity-100 transition-opacity" aria-label="Studio admin">Studio</button>
       </div>
       <p>Crafted in Lahore, Pakistan</p>
@@ -243,7 +259,7 @@
 <!-- ============ CHAT WIDGET ============ -->
 <div id="chatPanel" class="closed fixed bottom-24 right-5 z-[80] w-[380px] max-w-[92vw] h-[540px] max-h-[72vh] flex flex-col bg-cream border border-line shadow-[0_24px_60px_rgba(34,29,21,.3)]" role="dialog" aria-label="Studio concierge chat">
   <div class="flex-none bg-ink text-cream px-5 py-4 flex items-center gap-3">
-    <span class="w-9 h-9 bg-wood flex items-center justify-center flex-none"><i data-lucide="message-circle" class="w-4.5 h-4.5 w-5 h-5"></i></span>
+    <span class="w-9 h-9 bg-wood flex items-center justify-center flex-none"><i data-lucide="message-circle" class="w-5 h-5"></i></span>
     <div class="flex-1 min-w-0">
       <p class="font-serif text-xl leading-tight">Studio Concierge</p>
       <p class="text-[10px] tracking-[0.2em] uppercase text-cream/50">Typically replies in minutes</p>
@@ -323,7 +339,8 @@
         <span class="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-cream/50 border-l border-cream/20 pl-4 whitespace-nowrap">Studio Admin</span>
       </div>
       <div class="flex items-center gap-2">
-        <span class="hidden md:flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase text-cream/40 mr-3">
+        <span id="saveStatus" title="All changes are saved to this browser automatically."
+              class="hidden md:flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase text-cream/40 mr-3">
           <span class="w-1.5 h-1.5 bg-sand rounded-full"></span>Saved locally
         </span>
         <button id="btnViewSite" class="btn btn-ghost btn-sm">View Site</button>
@@ -426,6 +443,16 @@
         <p class="mt-1 text-[13px] text-ink2">Everything lives in this browser's localStorage under a single namespaced key.</p>
       </div>
       <div class="border border-line bg-white/50 p-6">
+        <h3 class="font-serif text-2xl">Backup &amp; restore</h3>
+        <p class="mt-2 text-[13px] text-ink2">Export everything — catalog, categories, branding and chat — to a file, or restore from a previous backup. Works even if this browser blocks storage.</p>
+        <div class="mt-4 flex flex-wrap gap-3">
+          <button id="btnExport" class="btn btn-dark btn-sm"><i data-lucide="download" class="w-4 h-4"></i><span>Export Backup</span></button>
+          <label class="btn btn-outline btn-sm cursor-pointer"><i data-lucide="upload" class="w-4 h-4"></i><span>Import Backup</span>
+            <input id="importFile" type="file" accept="application/json,.json" class="hidden" />
+          </label>
+        </div>
+      </div>
+      <div class="border border-line bg-white/50 p-6">
         <h3 class="font-serif text-2xl">Conversations</h3>
         <p id="chatStat" class="mt-2 text-[13px] text-ink2"></p>
         <button id="btnClearChat" class="btn btn-outline btn-sm mt-4">Clear Chat History</button>
@@ -455,13 +482,18 @@
 
 <script>
 /* =====================================================
-   Bilal Interior — SPA
+   Bilal Interior — SPA (persistence-hardened)
    Modules: STORE · UI KIT · WHATSAPP · BRAND · ROUTER ·
-   VIEWS · GRID · CHAT · ADMIN · TRIGGERS · INIT
+   VIEWS · GRID · OVERLAYS · CHAT · ADMIN · SAFEGUARDS ·
+   GLOBAL EVENTS · INIT
 
-   Hidden admin: footer "Studio" link, or 5 clicks on the
-   copyright. Default passphrase: admin123.
-   No price fields exist anywhere — by design.
+   Persistence contract:
+   ① Probe that storage works at boot (banner + pill if not).
+   ② On init: READ localStorage first. Seed defaults ONLY
+      when the key is empty. Existing data is NEVER
+      overwritten at startup.
+   ③ Writes happen only on admin/user mutations.
+   ④ Tabs stay in sync via the `storage` event.
 ===================================================== */
 (function(){
   'use strict';
@@ -473,6 +505,7 @@
   const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
   const picsum = (seed,w,h) => `https://picsum.photos/seed/${seed}/${w}/${h}.jpg`;
   const icons = () => { if (window.lucide) lucide.createIcons(); };
+  const deepClone = obj => JSON.parse(JSON.stringify(obj));
 
   const WA_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>';
 
@@ -516,29 +549,91 @@
     ]
   };
 
-  /* Shop-the-Look hotspots on the hero image: [x%, y%, productId] */
+  /* Shop-the-Look hotspots: [x%, y%, productId] */
   const HERO_LOOK = [
     { x:30, y:62, id:'p4' },
     { x:62, y:66, id:'p7' },
     { x:84, y:50, id:'p9' }
   ];
 
-  function loadData(){
-    try {
-      const raw = JSON.parse(localStorage.getItem(KEY));
-      if (raw && typeof raw === 'object') {
-        return {
-          settings:  { ...DEFAULTS.settings, ...(raw.settings||{}) },
-          categories: Array.isArray(raw.categories) ? raw.categories : JSON.parse(JSON.stringify(DEFAULTS.categories)),
-          products:   Array.isArray(raw.products)   ? raw.products   : JSON.parse(JSON.stringify(DEFAULTS.products)),
-          chat:       Array.isArray(raw.chat)       ? raw.chat       : JSON.parse(JSON.stringify(DEFAULTS.chat))
-        };
-      }
-    } catch(e){}
-    return JSON.parse(JSON.stringify(DEFAULTS)); // first run → seeds localStorage
+  /* ---------- Persistence core (hardened) ---------- */
+
+  /* ① Probe: does this browser/session actually allow storage?
+     (Preview iframes, strict privacy modes and "block all cookies"
+     settings throw — we detect that ONCE, loudly.) */
+  let storageOK = false;
+  try {
+    const probe = '__bi_storage_probe__';
+    localStorage.setItem(probe, '1');
+    storageOK = localStorage.getItem(probe) === '1';
+    localStorage.removeItem(probe);
+  } catch (e) { storageOK = false; }
+
+  /* Fills in fields added in later versions while preserving
+     EVERYTHING the user saved — including deliberately empty arrays. */
+  function normalize(saved){
+    const d = deepClone(DEFAULTS);
+    const s = (saved && typeof saved === 'object') ? saved : {};
+    return {
+      settings:   { ...d.settings, ...(s.settings || {}) },
+      categories: Array.isArray(s.categories) ? s.categories : d.categories,
+      products:   Array.isArray(s.products)   ? s.products   : d.products,
+      chat:       Array.isArray(s.chat)       ? s.chat       : d.chat
+    };
   }
-  let state = loadData();
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('Could not save — browser storage unavailable.'); } };
+
+  function loadState(){
+    if (!storageOK) return deepClone(DEFAULTS);   // memory-only session (banner warns)
+
+    const raw = localStorage.getItem(KEY);        // ① read first
+    if (!raw) {                                   // ② empty → seed defaults ONCE
+      const seeded = deepClone(DEFAULTS);
+      try { localStorage.setItem(KEY, JSON.stringify(seeded)); } catch(e){}
+      return seeded;
+    }
+    try {
+      return normalize(JSON.parse(raw));          // ③ data exists → it wins
+    } catch (err) {
+      console.warn('[Bilal Interior] Stored data unreadable — reseeding.', err);
+      const seeded = deepClone(DEFAULTS);
+      try { localStorage.setItem(KEY, JSON.stringify(seeded)); } catch(e){}
+      return seeded;
+    }
+  }
+
+  /* Admin status pill: green "Saved locally" ⇄ red "Not persisting" */
+  const PILL_OK = '<span class="w-1.5 h-1.5 rounded-full" style="background:#D8BC93"></span>Saved locally';
+  function updateSaveStatus(ok){
+    const pill = $('saveStatus');
+    if (!pill) return;
+    if (ok === false){
+      pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full" style="background:#B4552D"></span>Not persisting';
+      pill.style.color = '#E8A58C';
+      pill.title = 'This browser is blocking local storage — changes will be lost on refresh. Export a backup from the Data tab.';
+    } else {
+      pill.innerHTML = PILL_OK;
+      pill.style.color = '';
+      pill.title = 'All changes are saved to this browser automatically.';
+    }
+  }
+
+  let state = loadState();
+
+  /* ④ save() fires ONLY on mutations — never at page init. */
+  const save = () => {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      updateSaveStatus(true);
+      return true;
+    } catch (e) {
+      updateSaveStatus(false);
+      toast('Could not save — browser storage is unavailable in this session.');
+      return false;
+    }
+  };
+
+  /* One-line boot diagnostic — open DevTools → Console to see it. */
+  console.info(`[Bilal Interior] Storage: ${storageOK ? 'OK — changes will persist' : 'BLOCKED — this environment prevents saving'} | key: ${KEY}`);
 
   const catById   = id => state.categories.find(c => c.id === id);
   const prodById  = id => state.products.find(p => p.id === id);
@@ -895,7 +990,7 @@
     return `<div class="grid grid-cols-2 lg:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-12 lg:gap-y-16">
       ${items.map((p, i) => `
       <article class="group" data-reveal style="transition-delay:${(i % 4) * 70}ms">
-        <div class="relative overflow-hidden bg-cream2 ${sparse ? 'aspect-[4/5]' : 'aspect-[4/5]'} cursor-pointer" data-qv="${esc(p.id)}" role="button" tabindex="0" aria-label="Quick view: ${esc(p.title)}">
+        <div class="relative overflow-hidden bg-cream2 aspect-[4/5] cursor-pointer" data-qv="${esc(p.id)}" role="button" tabindex="0" aria-label="Quick view: ${esc(p.title)}">
           <img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" class="prod-img w-full h-full object-cover"
                onerror="this.onerror=null;this.src='${picsum('bilal-'+p.id,800,1000)}'" />
           ${p.badge ? `<span class="badge ${p.badge === 'New' ? 'badge-new' : ''}">${esc(p.badge)}</span>` : ''}
@@ -1063,7 +1158,8 @@
       fails = 0; loginPw.value = '';
       hideOverlay(loginOverlay);
       openAdmin();
-      toast('Welcome back, Bilal.');
+      if (!storageOK) toast('Warning: this browser is blocking storage — edits will NOT survive a refresh.');
+      else toast('Welcome back, Bilal.');
       return;
     }
     fails++;
@@ -1089,6 +1185,7 @@
     fillBranding();
     updateChatStat();
     switchTab('categories');
+    updateSaveStatus(storageOK);
     icons();
   }
   $('btnViewSite').addEventListener('click', () => hideOverlay(adminOverlay));
@@ -1161,7 +1258,7 @@
       catById(id).name = name;
       editingCatId = null;
       save(); renderCatList(); fillCatSelect(); refreshSite();
-      toast(`Renamed to "${name}" — live across the site.`);
+      toast(`Renamed to "${name}" — saved and live across the site.`);
       return;
     }
     if (act === 'del'){
@@ -1245,10 +1342,10 @@
     const data = { title, categoryId, description: fDesc.value.trim(), image };
     if (editingId){
       Object.assign(prodById(editingId), data);
-      toast('Product updated — live on the site.');
+      toast('Product updated — saved and live on the site.');
     } else {
       state.products.unshift({ id: uid('p'), badge:'', ...data });
-      toast('Added to the collection.');
+      toast('Added to the collection — saved.');
     }
     save(); renderAdminProdList(); refreshSite();
     closeForm();
@@ -1329,7 +1426,7 @@
     });
     save(); refreshSite();
     brandPreview.innerHTML = logoMarkup('header');
-    toast('Branding updated — live on the site.');
+    toast('Branding updated — saved and live on the site.');
   });
 
   /* ----- Security & data ----- */
@@ -1360,8 +1457,8 @@
   $('btnReset').addEventListener('click', () => {
     const b = $('btnReset');
     if (resetArm){
-      localStorage.removeItem(KEY);
-      state = JSON.parse(JSON.stringify(DEFAULTS));
+      try { localStorage.removeItem(KEY); } catch(e){}
+      state = deepClone(DEFAULTS);
       save();
       refreshSite();
       renderCatList(); fillCatSelect(); renderAdminProdList(); fillBranding(); updateChatStat(); renderChat();
@@ -1373,6 +1470,76 @@
     }
   });
 
+  /* ================= MODULE: STORAGE SAFEGUARDS ================= */
+
+  /* Red banner the instant storage is unavailable — no silent data loss. */
+  function mountStorageBanner(){
+    if (storageOK) return;
+    const bar = document.createElement('div');
+    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:400;background:#B4552D;color:#F5F0E6;font:500 12.5px/1.5 Jost,sans-serif;text-align:center;padding:10px 48px 10px 16px';
+    bar.innerHTML = 'This session can\'t save data — storage is blocked or you\'re inside a sandboxed preview. Download the file and open it directly in your browser, or export a backup from Admin → Data.';
+    const x = document.createElement('button');
+    x.textContent = '×';
+    x.style.cssText = 'position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:0;color:#F5F0E6;font-size:22px;cursor:pointer;line-height:1';
+    x.onclick = () => bar.remove();
+    bar.appendChild(x);
+    document.body.appendChild(bar);
+  }
+  mountStorageBanner();
+  if (!storageOK) updateSaveStatus(false);
+
+  /* Export / Import backup — catalog is portable no matter what. */
+  $('btnExport').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'bilal-interior-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+    toast('Backup file downloaded.');
+  });
+
+  $('importFile').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!parsed || typeof parsed !== 'object' ||
+            (!Array.isArray(parsed.products) && !Array.isArray(parsed.categories))) {
+          throw new Error('Unrecognised file');
+        }
+        state = normalize(parsed);
+        save();
+        refreshSite();
+        renderCatList(); fillCatSelect(); renderAdminProdList(); fillBranding(); updateChatStat(); renderChat();
+        toast('Backup restored — the live site is updated.');
+      } catch (err) {
+        toast('That file is not a valid Bilal Interior backup.');
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  /* Cross-tab sync: edits in one tab appear in the others,
+     so two open tabs can never silently overwrite each other. */
+  window.addEventListener('storage', e => {
+    if (e.key !== KEY || !e.newValue) return;
+    try {
+      state = normalize(JSON.parse(e.newValue));
+      const adminOpen = !adminOverlay.classList.contains('hidden');
+      if (adminOpen){
+        renderCatList(); fillCatSelect(); renderAdminProdList(); fillBranding(); updateChatStat();
+        toast('Data was updated in another tab — lists refreshed.');
+      } else {
+        refreshSite();
+      }
+      renderChat();
+    } catch(err){}
+  });
+
   /* ================= MODULE: GLOBAL EVENTS ================= */
   document.addEventListener('click', e => {
     const hs = e.target.closest('[data-hotspot]');
@@ -1382,7 +1549,6 @@
     const qv = e.target.closest('[data-qv]');
     if (qv){ openQV(qv.dataset.qv); return; }
     if (e.target.closest('[data-qv-close]')){ hideOverlay(qvOverlay); return; }
-    if (e.target.closest('.wa-general')) return; // real links handled natively
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter'){
@@ -1454,3 +1620,21 @@
 </html>
 ```
 
+**Do this exactly, in order (5 minutes):**
+
+1. **Save the code above as `index.html`** — replacing your old copy.
+2. **Open it in a normal browser tab** — double-click the file, or use Live Server. If you were testing inside a preview pane, this step alone is your fix.
+3. **Check the console** (F12): you'll see either `[Bilal Interior] Storage: OK — changes will persist` or `Storage: BLOCKED`. If it says BLOCKED, the environment is preventing saves — no code can override that; move the file to a different way of opening (step 2).
+4. Open admin → rename "Sofas" → **View Site** → confirm the nav shows the new name.
+5. **Fully close the tab, reopen the same way** → the rename is still there. ✅
+
+**Common pitfalls that cause exactly your symptom:**
+
+- Opening it once via double-click (`file://…`) and later via Live Server (`127.0.0.1:5500`) — those are *different storage buckets*. Note `localhost` and `127.0.0.1` are different origins too. Pick one method and always use it.
+- Incognito/private windows wipe everything on close.
+- Chrome's "Clear cookies and site data when you close all windows" setting (Privacy → Third-party cookies → All time).
+- Having the site open in **two tabs** — the old version now syncs instead of overwriting, but closing extra tabs is still tidier.
+
+**Safety net:** even in the worst environment, Admin → Data → **Export Backup** downloads your entire catalog as JSON, and **Import Backup** restores it anywhere — so your work is never trapped.
+
+If step 3 shows `Storage: OK` and step 5 *still* loses your rename, tell me the exact URL from the address bar and your browser + OS, and I'll pin it down from there.
