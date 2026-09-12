@@ -1,0 +1,15 @@
+backend:
+  name: git-gateway
+  branch: main
+media_folder: "images"
+public_folder: "/images"
+collections:
+  - name: "products"
+    label: "Furniture & Renders"
+    folder: "data"
+    create: true
+    extension: "json"
+    fields:
+      - {label: "Product Name", name: "title", widget: "string"}
+      - {label: "Category (e.g. Sofas, 3D Renders)", name: "category", widget: "string"}
+      - {label: "Image", name: "image", widget: "image"}
