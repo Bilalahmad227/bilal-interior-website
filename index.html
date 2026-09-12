@@ -1,0 +1,944 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bilal Interior — Bespoke Furniture &amp; 3D Interior Design, Lahore</title>
+<meta name="description" content="Premium furniture manufacturing, material procurement, and 3D interior design services based in Lahore." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23221D15'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='36' fill='%23D8BC93' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        cream:'#F5F0E6', cream2:'#EAE1D0', line:'#DCD2BF',
+        ink:'#221D15', ink2:'#5B5142',
+        wood:'#9C6B3A', sand:'#D8BC93', clay:'#B4552D'
+      },
+      fontFamily: {
+        serif:['"Cormorant Garamond"','Georgia','serif'],
+        sans:['Jost','"Helvetica Neue"','sans-serif']
+      }
+    }}
+  };
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  :root{ --cream:#F5F0E6; --ink:#221D15; --wood:#9C6B3A; --line:#DCD2BF; --clay:#B4552D; }
+  *{ -webkit-tap-highlight-color:transparent; }
+  html{ scroll-behavior:smooth; scroll-padding-top:100px; }
+  ::selection{ background:#9C6B3A; color:#F5F0E6; }
+  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar-track{ background:#EFE8DA; }
+  ::-webkit-scrollbar-thumb{ background:#C9BCA2; border:3px solid #EFE8DA; border-radius:8px; }
+  :focus-visible{ outline:2px solid #9C6B3A; outline-offset:3px; }
+
+  /* Film grain — barely-there tactile layer over the whole page */
+  #grain{ position:fixed; inset:0; z-index:300; pointer-events:none; opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  .kicker{ font-size:11px; letter-spacing:.32em; text-transform:uppercase; font-weight:500; }
+
+  /* Buttons */
+  .btn{ display:inline-flex; align-items:center; justify-content:center; gap:.7rem;
+    font-family:'Jost',sans-serif; font-size:11.5px; font-weight:500; letter-spacing:.2em; text-transform:uppercase;
+    padding:1rem 1.75rem; cursor:pointer; white-space:nowrap;
+    transition:background-color .35s,color .35s,border-color .35s; }
+  .btn svg{ flex:none; }
+  .btn-sm{ padding:.7rem 1.15rem; font-size:10.5px; }
+  .btn-dark{ background:#221D15; color:#F5F0E6; border:1px solid #221D15; }
+  .btn-dark:hover{ background:#9C6B3A; border-color:#9C6B3A; }
+  .btn-outline{ border:1px solid rgba(34,29,21,.3); color:#221D15; background:transparent; }
+  .btn-outline:hover{ background:#221D15; color:#F5F0E6; border-color:#221D15; }
+  .btn-light{ background:#F5F0E6; color:#221D15; border:1px solid #F5F0E6; }
+  .btn-light:hover{ background:#D8BC93; border-color:#D8BC93; }
+  .btn-ghost{ border:1px solid rgba(245,240,230,.45); color:#F5F0E6; background:transparent; }
+  .btn-ghost:hover{ background:#F5F0E6; color:#221D15; }
+  .btn-clay{ border:1px solid #B4552D; color:#B4552D; background:transparent; }
+  .btn-clay:hover{ background:#B4552D; color:#F5F0E6; }
+  .btn-clay.armed{ background:#B4552D; color:#F5F0E6; }
+  .btn-hdr{ display:inline-flex; align-items:center; gap:.6rem; font-size:10.5px; letter-spacing:.2em;
+    text-transform:uppercase; padding:.65rem 1.15rem; border:1px solid currentColor; color:inherit;
+    transition:background-color .35s,color .35s,border-color .35s; }
+  .btn-hdr:hover{ background:#9C6B3A; border-color:#9C6B3A; color:#F5F0E6; }
+
+  /* Header theme flip */
+  #siteHeader{ color:#F5F0E6; transition:background-color .5s,color .5s,box-shadow .5s; }
+  #siteHeader.scrolled{ background:rgba(245,240,230,.92); backdrop-filter:blur(14px);
+    color:#221D15; box-shadow:0 1px 0 #DCD2BF; }
+
+  .nav-link{ position:relative; }
+  .nav-link::after{ content:''; position:absolute; left:0; bottom:-6px; height:1px; width:100%;
+    background:currentColor; transform:scaleX(0); transform-origin:right; transition:transform .4s cubic-bezier(.19,1,.22,1); }
+  .nav-link:hover::after{ transform:scaleX(1); transform-origin:left; }
+
+  /* Hero */
+  @keyframes kb{ from{ transform:scale(1); } to{ transform:scale(1.1); } }
+  .kenburns{ animation:kb 24s ease-in-out infinite alternate; }
+  .hline{ display:block; overflow:hidden; padding-bottom:.08em; margin-bottom:-.06em; }
+  .hline>span{ display:block; transform:translateY(115%); animation:rise 1.2s cubic-bezier(.19,1,.22,1) forwards; }
+  .hline:nth-of-type(1)>span{ animation-delay:.15s; }
+  .hline:nth-of-type(2)>span{ animation-delay:.32s; }
+  @keyframes rise{ to{ transform:translateY(0); } }
+  .fade-up{ opacity:0; transform:translateY(18px); animation:fup 1s cubic-bezier(.19,1,.22,1) forwards; }
+  @keyframes fup{ to{ opacity:1; transform:none; } }
+  .scroll-line{ position:relative; width:1px; height:52px; background:rgba(245,240,230,.25); overflow:hidden; }
+  .scroll-line::after{ content:''; position:absolute; left:0; top:-40%; width:100%; height:40%;
+    background:#D8BC93; animation:drip 2.2s cubic-bezier(.65,0,.35,1) infinite; }
+  @keyframes drip{ to{ top:110%; } }
+
+  /* Scroll reveals */
+  [data-reveal]{ opacity:0; transform:translateY(30px);
+    transition:opacity .9s cubic-bezier(.19,1,.22,1),transform .9s cubic-bezier(.19,1,.22,1); }
+  [data-reveal].revealed{ opacity:1; transform:none; }
+
+  /* Filter tabs */
+  .ftab,.atab{ position:relative; font-size:11.5px; letter-spacing:.2em; text-transform:uppercase;
+    color:rgba(34,29,21,.45); transition:color .3s; cursor:pointer; background:none; border:none; padding:0 0 8px; }
+  .ftab::after,.atab::after{ content:''; position:absolute; left:0; bottom:0; height:1px; width:100%;
+    background:#9C6B3A; transform:scaleX(0); transform-origin:right; transition:transform .45s cubic-bezier(.19,1,.22,1); }
+  .ftab:hover,.atab:hover{ color:#221D15; }
+  .ftab.active,.atab.active{ color:#221D15; }
+  .ftab.active::after,.atab.active::after{ transform:scaleX(1); transform-origin:left; }
+  .atab{ padding:1.1rem 0; margin-right:2.5rem; }
+
+  /* Fields */
+  .field{ width:100%; background:rgba(255,255,255,.65); border:1px solid #DCD2BF; padding:.8rem 1rem;
+    font-size:14px; color:#221D15; outline:none; transition:border-color .3s,box-shadow .3s; }
+  .field:focus{ border-color:#9C6B3A; box-shadow:0 0 0 3px rgba(156,107,58,.12); outline:none; }
+  .field::placeholder{ color:#A79B85; }
+  .flabel{ display:block; font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:#5B5142; margin-bottom:.5rem; }
+
+  /* Admin row buttons */
+  .icon-btn{ display:inline-flex; align-items:center; justify-content:center; gap:.45rem;
+    min-width:38px; height:38px; padding:0 .55rem; border:1px solid #DCD2BF; background:transparent;
+    color:#5B5142; cursor:pointer; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+    transition:all .3s; }
+  .icon-btn:hover{ background:#221D15; border-color:#221D15; color:#F5F0E6; }
+  .icon-btn.armed{ border-color:#B4552D; color:#B4552D; background:rgba(180,85,45,.08); }
+  .icon-btn.armed:hover{ background:#B4552D; border-color:#B4552D; color:#F5F0E6; }
+
+  /* Modals & toasts */
+  .modal-panel{ animation:panelIn .45s cubic-bezier(.19,1,.22,1); }
+  @keyframes panelIn{ from{ opacity:0; transform:translateY(24px) scale(.985); } to{ opacity:1; transform:none; } }
+  .backdrop-fade{ animation:bfade .4s ease; }
+  @keyframes bfade{ from{ opacity:0; } to{ opacity:1; } }
+  .shake{ animation:shake .5s; }
+  @keyframes shake{ 20%{transform:translateX(-8px);} 40%{transform:translateX(7px);} 60%{transform:translateX(-5px);} 80%{transform:translateX(3px);} }
+  #toasts{ position:fixed; right:1.25rem; bottom:1.25rem; z-index:210; display:flex; flex-direction:column; gap:.6rem; align-items:flex-end; }
+  .toast{ display:flex; align-items:center; gap:1.1rem; background:#221D15; color:#F5F0E6;
+    padding:.9rem 1.2rem; font-size:13px; border-left:2px solid #9C6B3A;
+    box-shadow:0 12px 30px rgba(34,29,21,.28); max-width:min(92vw,400px);
+    opacity:0; transform:translateY(14px); transition:all .35s cubic-bezier(.19,1,.22,1); }
+  .toast.show{ opacity:1; transform:none; }
+  .toast-act{ font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:#D8BC93;
+    border-bottom:1px solid #D8BC93; padding-bottom:1px; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; }
+
+  @media (prefers-reduced-motion:reduce){
+    .kenburns,.scroll-line::after{ animation:none; }
+    [data-reveal]{ transition:none; opacity:1; transform:none; }
+    .hline>span{ animation:none; transform:none; }
+  }
+</style>
+</head>
+
+<body class="bg-cream text-ink font-sans antialiased overflow-x-hidden">
+<div id="grain" aria-hidden="true"></div>
+
+<!-- ============ HEADER ============ -->
+<header id="siteHeader" class="fixed top-0 inset-x-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between gap-6">
+    <a href="#hero" class="brand-slot block" data-variant="header" aria-label="Bilal Interior — home"></a>
+    <nav class="hidden md:flex items-center gap-10 text-[11.5px] tracking-[0.22em] uppercase">
+      <a href="#collection" class="nav-link">Collection</a>
+      <a href="#services" class="nav-link">Services</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <a href="#" target="_blank" rel="noopener" class="btn-hdr wa-general hidden sm:inline-flex">
+        <span class="wa-ic"></span><span>Inquire</span>
+      </a>
+      <button id="menuBtn" class="md:hidden p-2" aria-label="Toggle menu"><i data-lucide="menu" class="w-6 h-6"></i></button>
+    </div>
+  </div>
+  <div id="mobileMenu" class="md:hidden hidden border-t border-line bg-cream text-ink">
+    <nav class="px-6 py-6 flex flex-col gap-5 text-[12px] tracking-[0.22em] uppercase">
+      <a href="#collection" class="mm-link">Collection</a>
+      <a href="#services" class="mm-link">Services</a>
+      <a href="#contact" class="mm-link">Contact</a>
+      <a href="#" target="_blank" rel="noopener" class="btn btn-dark btn-sm wa-general mt-2 justify-center">
+        <span class="wa-ic"></span><span>WhatsApp Us</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ============ HERO ============ -->
+  <section id="hero" class="relative h-screen min-h-[640px] overflow-hidden bg-ink">
+    <div class="absolute inset-0 kenburns">
+      <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=2000&auto=format&fit=crop"
+           alt="Modern living room interior designed by Bilal Interior"
+           class="w-full h-full object-cover"
+           onerror="this.onerror=null;this.src='https://picsum.photos/seed/bilal-hero/1920/1080.jpg'" />
+    </div>
+    <div class="absolute inset-0 bg-ink/45" aria-hidden="true"></div>
+    <div class="absolute inset-4 lg:inset-6 border border-cream/25 pointer-events-none z-10" aria-hidden="true"></div>
+    <div class="hidden lg:block absolute left-10 top-1/2 -translate-y-1/2 z-10 text-cream/45 text-[10px] tracking-[0.45em] uppercase"
+         style="writing-mode:vertical-rl">Furniture · Materials · 3D Design — Lahore</div>
+
+    <div class="relative z-10 h-full max-w-7xl mx-auto px-8 lg:px-16 flex flex-col justify-end pb-28 lg:pb-32">
+      <p class="fade-up kicker text-sand" style="animation-delay:.05s">Bilal Interior — Bespoke Furniture &amp; Interior Design</p>
+      <h1 class="mt-6 font-serif font-medium text-cream" style="font-size:clamp(3rem,8.5vw,7rem);line-height:.98">
+        <span class="hline"><span>Composed in Lahore,</span></span>
+        <span class="hline"><span><em class="italic text-sand">crafted</em> for life.</span></span>
+      </h1>
+      <div class="fade-up mt-10 flex flex-wrap gap-4" style="animation-delay:.7s">
+        <a href="#collection" class="btn btn-light">View Collection <i data-lucide="arrow-down" class="w-4 h-4"></i></a>
+        <a href="#" target="_blank" rel="noopener" class="btn btn-ghost wa-general"><span class="wa-ic"></span><span>Book a Consultation</span></a>
+      </div>
+    </div>
+
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden md:flex flex-col items-center gap-3 text-cream/60">
+      <span class="text-[10px] tracking-[0.35em] uppercase">Scroll</span>
+      <span class="scroll-line"></span>
+    </div>
+  </section>
+
+  <!-- ============ SERVICES ============ -->
+  <section id="services" class="py-24 lg:py-32">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10">
+      <div class="max-w-2xl" data-reveal>
+        <p class="kicker text-wood">What We Do</p>
+        <h2 class="mt-4 font-serif text-5xl lg:text-6xl leading-[1.05]">Three crafts, <em class="italic">one</em> studio.</h2>
+      </div>
+      <div class="mt-14 grid md:grid-cols-3 gap-x-10 gap-y-12">
+        <div class="border-t border-line pt-8" data-reveal>
+          <span class="font-serif italic text-5xl text-sand">01</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">Furniture Manufacturing</h3>
+          <p class="mt-3 text-sm leading-relaxed text-ink2">Solid-wood pieces built to order in our own Lahore workshop — from a single statement chair to a full home of bespoke joinery.</p>
+        </div>
+        <div class="border-t border-line pt-8" data-reveal style="transition-delay:.1s">
+          <span class="font-serif italic text-5xl text-sand">02</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">Material Procurement</h3>
+          <p class="mt-3 text-sm leading-relaxed text-ink2">Hardwoods, natural stone, textiles and hardware — sourced, vetted and sampled for every project, so nothing is left to chance.</p>
+        </div>
+        <div class="border-t border-line pt-8" data-reveal style="transition-delay:.2s">
+          <span class="font-serif italic text-5xl text-sand">03</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">3D Interior Design</h3>
+          <p class="mt-3 text-sm leading-relaxed text-ink2">Photoreal spatial renders and complete layouts — walk through your room, and refine it, before a single plank is cut.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COLLECTION ============ -->
+  <section id="collection" class="py-24 lg:py-28 border-t border-line">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8" data-reveal>
+        <div>
+          <p class="kicker text-wood">Portfolio</p>
+          <h2 class="mt-4 font-serif text-6xl lg:text-7xl leading-[1.02]">Selected<br /><em class="italic">work</em></h2>
+        </div>
+        <p class="max-w-sm text-[15px] leading-relaxed text-ink2">Every piece is made to order and quoted privately over WhatsApp — so you'll never find price tags here, only work we're proud of.</p>
+      </div>
+
+      <div id="filters" class="mt-12 flex flex-wrap gap-x-9 gap-y-3 border-b border-line" data-reveal></div>
+
+      <div id="grid" class="mt-16 grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-16 lg:gap-y-24"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER / ABOUT & CONTACT ============ -->
+<footer id="contact" class="bg-ink text-cream border-t border-cream/10">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 pt-16 pb-10">
+    <div class="overflow-hidden select-none" aria-hidden="true">
+      <p id="footerMark" class="font-serif text-[15vw] leading-[0.82] text-cream/[0.06] whitespace-nowrap text-center translate-y-[14%]">Bilal Interior</p>
+    </div>
+
+    <div class="mt-14 grid lg:grid-cols-12 gap-12">
+      <div class="lg:col-span-5">
+        <a href="#hero" class="brand-slot inline-block" data-variant="footer"></a>
+        <p class="mt-6 text-cream/60 max-w-sm leading-relaxed text-[15px]">Premium furniture manufacturing, material procurement, and 3D interior design services based in Lahore.</p>
+        <a href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm wa-general mt-8"><span class="wa-ic"></span><span>Message us on WhatsApp</span></a>
+      </div>
+      <div class="lg:col-span-3">
+        <p class="kicker text-cream/40">Explore</p>
+        <ul class="mt-5 space-y-3 text-[15px]">
+          <li><a href="#collection" class="text-cream/70 hover:text-sand transition-colors">Collection</a></li>
+          <li><a href="#services" class="text-cream/70 hover:text-sand transition-colors">Services</a></li>
+          <li><a href="#hero" class="text-cream/70 hover:text-sand transition-colors">Back to top</a></li>
+        </ul>
+      </div>
+      <div class="lg:col-span-4">
+        <p class="kicker text-cream/40">Contact</p>
+        <ul class="mt-5 space-y-4 text-[15px]">
+          <li class="flex items-baseline gap-3"><i data-lucide="phone" class="w-4 h-4 text-sand translate-y-[2px]"></i><a id="fPhone" href="#" class="hover:text-sand transition-colors"></a></li>
+          <li class="flex items-baseline gap-3"><i data-lucide="mail" class="w-4 h-4 text-sand translate-y-[2px]"></i><a id="fEmail" href="#" class="hover:text-sand transition-colors"></a></li>
+          <li class="flex items-baseline gap-3"><i data-lucide="map-pin" class="w-4 h-4 text-sand translate-y-[2px]"></i><span id="fAddress" class="text-cream/70"></span></li>
+          <li class="flex items-baseline gap-3"><i data-lucide="clock" class="w-4 h-4 text-sand translate-y-[2px]"></i><span id="fHours" class="text-cream/70"></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-cream/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[10.5px] tracking-[0.18em] uppercase text-cream/40">
+      <!-- Hidden admin: click this copyright line 5× quickly → passphrase "admin123" -->
+      <p id="copyright" class="cursor-pointer select-none" title="©">© 2025 Bilal Interior — All rights reserved</p>
+      <p>Crafted in Lahore, Pakistan</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ QUICK VIEW MODAL ============ -->
+<div id="qvOverlay" class="fixed inset-0 z-[85] hidden items-center justify-center p-4 md:p-8" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 bg-ink/70 backdrop-blur-sm backdrop-fade" data-qv-close></div>
+  <div class="modal-panel relative w-full max-w-5xl max-h-[88vh] overflow-y-auto bg-cream grid md:grid-cols-2">
+    <button data-qv-close class="absolute top-4 right-4 z-10 w-10 h-10 bg-ink text-cream flex items-center justify-center hover:bg-wood transition-colors" aria-label="Close quick view"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <div class="bg-cream2">
+      <img id="qvImg" src="" alt="" class="w-full h-64 md:h-full object-cover" />
+    </div>
+    <div class="p-8 lg:p-12 flex flex-col">
+      <p id="qvCat" class="kicker text-wood"></p>
+      <h3 id="qvTitle" class="mt-3 font-serif text-4xl leading-tight"></h3>
+      <p id="qvDesc" class="mt-5 text-[15px] leading-relaxed text-ink2"></p>
+      <div class="mt-auto pt-10">
+        <a id="qvWa" href="#" target="_blank" rel="noopener" class="btn btn-dark w-full justify-center"><span class="wa-ic"></span><span>Inquire on WhatsApp</span></a>
+        <p class="mt-3 text-center text-[11px] tracking-[0.15em] uppercase text-ink/40">Typical response — under two hours</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HIDDEN ADMIN LOGIN ============ -->
+<div id="loginOverlay" class="fixed inset-0 z-[95] hidden items-center justify-center p-5" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 bg-ink/70 backdrop-blur-sm backdrop-fade" data-close-login></div>
+  <div id="loginCard" class="modal-panel relative w-full max-w-sm bg-cream border border-line p-8 lg:p-10">
+    <button data-close-login class="absolute top-4 right-4 text-ink/40 hover:text-ink transition-colors" aria-label="Close login"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <div class="w-12 h-12 bg-ink text-cream flex items-center justify-center"><i data-lucide="lock" class="w-5 h-5"></i></div>
+    <h3 class="mt-6 font-serif text-3xl">Studio Access</h3>
+    <p class="mt-2 text-sm text-ink2">Enter the admin passphrase to manage the portfolio.</p>
+    <form id="loginForm" class="mt-6" novalidate>
+      <label class="flabel" for="loginPw">Passphrase</label>
+      <div class="relative">
+        <input id="loginPw" type="password" class="field pr-12" placeholder="••••••••" autocomplete="current-password" />
+        <button type="button" id="pwEye" class="absolute right-3 top-1/2 -translate-y-1/2 text-ink/50 hover:text-ink" aria-label="Show password"><i data-lucide="eye" class="w-4 h-4"></i></button>
+      </div>
+      <p id="loginErr" class="hidden mt-3 text-[13px] text-clay"></p>
+      <button id="loginBtn" type="submit" class="btn btn-dark w-full mt-5">Unlock Dashboard</button>
+    </form>
+  </div>
+</div>
+
+<!-- ============ ADMIN DASHBOARD ============ -->
+<div id="adminOverlay" class="fixed inset-0 z-[70] hidden flex-col bg-cream" role="dialog" aria-modal="true">
+  <div class="flex-none bg-ink text-cream">
+    <div class="max-w-6xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4 min-w-0">
+        <span class="brand-slot block" data-variant="admin"></span>
+        <span class="hidden sm:inline text-[10px] tracking-[0.3em] uppercase text-cream/50 border-l border-cream/20 pl-4 whitespace-nowrap">Studio Admin</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="hidden md:flex items-center gap-2 text-[10px] tracking-[0.25em] uppercase text-cream/40 mr-3">
+          <span class="w-1.5 h-1.5 bg-sand rounded-full"></span>Saved locally
+        </span>
+        <button id="btnViewSite" class="btn btn-ghost btn-sm">View Site</button>
+        <button id="btnLogout" class="icon-btn !border-cream/25 !text-cream/70 hover:!bg-cream hover:!text-ink" aria-label="Log out"><i data-lucide="log-out" class="w-4 h-4"></i></button>
+      </div>
+    </div>
+  </div>
+  <div class="flex-none border-b border-line">
+    <div class="max-w-6xl mx-auto px-5 lg:px-8 flex">
+      <button id="atab-products" class="atab active">Portfolio</button>
+      <button id="atab-branding" class="atab">Branding &amp; Contact</button>
+      <button id="atab-security" class="atab">Security</button>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto">
+    <!-- PORTFOLIO TAB -->
+    <section id="tab-products" class="max-w-6xl mx-auto px-5 lg:px-8 py-10">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 class="font-serif text-4xl">Portfolio Items</h2>
+          <p id="prodCount" class="mt-1 text-[13px] text-ink2"></p>
+        </div>
+        <button id="btnAdd" class="btn btn-dark btn-sm"><i data-lucide="plus" class="w-4 h-4"></i><span>Add Item</span></button>
+      </div>
+      <p class="mt-3 text-[13px] text-ink/45 max-w-lg">Quoting happens privately over WhatsApp — the form only manages title, description, category and image. No price fields, by design.</p>
+
+      <form id="prodForm" class="hidden mt-8 border border-line bg-white/50 p-6 lg:p-8" novalidate>
+        <div class="flex items-center justify-between">
+          <h3 id="formTitle" class="font-serif text-2xl">New item</h3>
+          <button type="button" id="formClose" class="icon-btn" aria-label="Close form"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="mt-6 grid md:grid-cols-2 gap-6">
+          <div class="space-y-5">
+            <div>
+              <label class="flabel" for="fTitle">Title</label>
+              <input id="fTitle" class="field" placeholder="e.g. Denim Upholstered Stool" />
+            </div>
+            <div>
+              <label class="flabel" for="fCat">Category</label>
+              <select id="fCat" class="field"></select>
+            </div>
+            <div>
+              <label class="flabel" for="fImage">Image URL</label>
+              <input id="fImage" class="field" placeholder="https://… (leave blank to auto-generate)" />
+              <img id="fPrev" class="hidden mt-3 w-full aspect-[4/3] object-cover bg-cream2" alt="Image preview" />
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex-1">
+              <label class="flabel" for="fDesc">Description</label>
+              <textarea id="fDesc" rows="9" class="field resize-none" placeholder="Materials, finish, design style…"></textarea>
+            </div>
+            <p id="formErr" class="hidden mt-3 text-[13px] text-clay"></p>
+            <div class="mt-4 flex gap-3">
+              <button type="submit" class="btn btn-dark btn-sm flex-1"><i data-lucide="check" class="w-4 h-4"></i><span>Save Item</span></button>
+              <button type="button" id="btnCancel" class="btn btn-outline btn-sm flex-1">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div id="prodList" class="mt-8 border-y border-line divide-y divide-line"></div>
+    </section>
+
+    <!-- BRANDING TAB -->
+    <section id="tab-branding" class="hidden max-w-3xl mx-auto px-5 lg:px-8 py-10">
+      <h2 class="font-serif text-4xl">Branding &amp; Contact</h2>
+      <p class="mt-1 text-[13px] text-ink2">Changes apply to the live site instantly and are stored in this browser.</p>
+      <form id="brandForm" class="mt-8 space-y-6" novalidate>
+        <div class="border border-line bg-white/50 p-6">
+          <p class="kicker text-ink/50">Live preview</p>
+          <div id="brandPreview" class="mt-4 flex items-center h-16 text-ink"></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div><label class="flabel" for="bLogoText">Logo text</label><input id="bLogoText" class="field" /></div>
+          <div><label class="flabel" for="bLogoImage">Logo image URL <span class="normal-case tracking-normal text-ink/40">(optional — overrides text)</span></label><input id="bLogoImage" class="field" placeholder="https://…png" /></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div><label class="flabel" for="bWhatsapp">WhatsApp number <span class="normal-case tracking-normal text-ink/40">(with country code)</span></label><input id="bWhatsapp" class="field" placeholder="923001234567" /></div>
+          <div><label class="flabel" for="bEmail">Email</label><input id="bEmail" class="field" /></div>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div><label class="flabel" for="bAddress">Studio address</label><input id="bAddress" class="field" /></div>
+          <div><label class="flabel" for="bHours">Opening hours</label><input id="bHours" class="field" /></div>
+        </div>
+        <p id="brandErr" class="hidden text-[13px] text-clay"></p>
+        <button type="submit" class="btn btn-dark btn-sm"><i data-lucide="check" class="w-4 h-4"></i><span>Save Branding</span></button>
+      </form>
+    </section>
+
+    <!-- SECURITY TAB -->
+    <section id="tab-security" class="hidden max-w-3xl mx-auto px-5 lg:px-8 py-10">
+      <h2 class="font-serif text-4xl">Security</h2>
+      <form id="pwForm" class="mt-8 border border-line bg-white/50 p-6 space-y-5 max-w-xl" novalidate>
+        <h3 class="font-serif text-2xl">Change passphrase</h3>
+        <div><label class="flabel" for="sCur">Current passphrase</label><input id="sCur" type="password" class="field" autocomplete="current-password" /></div>
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div><label class="flabel" for="sNew">New passphrase</label><input id="sNew" type="password" class="field" autocomplete="new-password" /></div>
+          <div><label class="flabel" for="sConf">Confirm new</label><input id="sConf" type="password" class="field" autocomplete="new-password" /></div>
+        </div>
+        <p id="secErr" class="hidden text-[13px] text-clay"></p>
+        <button type="submit" class="btn btn-dark btn-sm"><i data-lucide="key-round" class="w-4 h-4"></i><span>Update Passphrase</span></button>
+      </form>
+      <div class="mt-10 border border-clay/40 bg-clay/5 p-6 max-w-xl">
+        <h3 class="font-serif text-2xl text-clay">Reset website data</h3>
+        <p class="mt-2 text-[13px] text-ink2">Restores the default portfolio and branding, and re-enables the default passphrase. This cannot be undone.</p>
+        <button id="btnReset" class="btn btn-clay btn-sm mt-5">Reset Everything</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+/* =====================================================
+   Bilal Interior — single-file app
+   Hidden admin: click the footer copyright 5× →
+   passphrase "admin123" (changeable in Security tab).
+   Catalog + branding persist to localStorage.
+===================================================== */
+(function(){
+  'use strict';
+  const KEY = 'bilal_interior_site_v1';
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const icons = () => { if (window.lucide) lucide.createIcons(); };
+
+  /* ---------- WhatsApp glyph (Lucide has no brand icons) ---------- */
+  const WA_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>';
+
+  const CATEGORIES = ['3D Spatial Renders', 'Custom Furniture'];
+
+  /* ---------- Seed data: initializes localStorage on first run.
+     No price fields exist anywhere in this model — by design. ---------- */
+  const DEFAULTS = {
+    settings: {
+      logoText: 'Bilal Interior', logoImage: '',
+      whatsapp: '923001234567', email: 'studio@bilalinterior.pk',
+      address: '14-C2, Main Boulevard, Gulberg III, Lahore',
+      hours: 'Mon – Sat · 10:00 – 20:00',
+      password: 'admin123'
+    },
+    products: [
+      { id:'p1', title:'Modern Living Room Concept', category:'3D Spatial Renders',
+        image:'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1200&auto=format&fit=crop',
+        description:'A photoreal 3D spatial render for a calm, light-filled lounge — layered neutrals, warm oak flooring and custom low-profile seating around a sculptural coffee table.' },
+      { id:'p2', title:'Commercial Space Layout', category:'3D Spatial Renders',
+        image:'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1200&auto=format&fit=crop',
+        description:'Rendered layout study for a boutique café — zoning for customer flow, banquette seating and warm pendant lighting over the service counter.' },
+      { id:'p3', title:'Denim Upholstered Stool & Cushions', category:'Custom Furniture',
+        image:'https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=1200&auto=format&fit=crop',
+        description:'Hand-built hardwood stool upholstered in heavyweight indigo denim with matching accent cushions — stitch details left proudly exposed for a lived-in, tailored feel.' },
+      { id:'p4', title:'Modern Accent Chair', category:'Custom Furniture',
+        image:'https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=1200&auto=format&fit=crop',
+        description:'A sculptural accent chair in pale ash with a woven seat — quiet lines and honest joinery that let the material do the talking.' }
+    ]
+  };
+
+  /* ---------- Persistence ---------- */
+  function loadData(){
+    try {
+      const raw = JSON.parse(localStorage.getItem(KEY));
+      if (raw && typeof raw === 'object') {
+        return {
+          settings: { ...DEFAULTS.settings, ...(raw.settings || {}) },
+          products: Array.isArray(raw.products) ? raw.products : JSON.parse(JSON.stringify(DEFAULTS.products))
+        };
+      }
+    } catch(e){}
+    return JSON.parse(JSON.stringify(DEFAULTS)); // first run → seed localStorage
+  }
+  let state = loadData();
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('Could not save — browser storage unavailable.'); } };
+
+  /* ---------- Toasts (with optional Undo action) ---------- */
+  function toast(msg, opts = {}){
+    const box = $('toasts');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = `<span>${esc(msg)}</span>${opts.action ? `<button class="toast-act">${esc(opts.action.label)}</button>` : ''}`;
+    box.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    let done = false;
+    const dismiss = () => { if (done) return; done = true; t.classList.remove('show'); setTimeout(() => t.remove(), 350); };
+    const timer = setTimeout(dismiss, opts.action ? 6000 : 3200);
+    if (opts.action) t.querySelector('.toast-act').onclick = () => { clearTimeout(timer); opts.action.fn(); dismiss(); };
+  }
+  const showErr = (el, msg) => { el.textContent = msg; el.classList.remove('hidden'); };
+  const hideErr = el => el.classList.add('hidden');
+
+  /* ---------- WhatsApp deep links ---------- */
+  const digits = () => String(state.settings.whatsapp).replace(/\D/g, '');
+  const waLink = title => `https://wa.me/${digits()}?text=${encodeURIComponent(`Hello Bilal Interior, I am interested in your design: ${title}. Can you provide more details?`)}`;
+  const waGeneralLink = () => `https://wa.me/${digits()}?text=${encodeURIComponent('Hello Bilal Interior, I would like to discuss an interior or furniture project.')}`;
+
+  /* ---------- Brand lockup (text + monogram, or image URL) ---------- */
+  const VARIANTS = {
+    header: { box:'w-9 h-9 text-base',   text:'text-[21px] tracking-[0.06em]',          img:'h-8 md:h-9 w-auto max-w-[190px] object-contain' },
+    footer: { box:'w-12 h-12 text-xl',   text:'text-4xl md:text-5xl tracking-[0.03em]', img:'h-14 w-auto max-w-[320px] object-contain' },
+    admin:  { box:'w-8 h-8 text-sm',     text:'text-lg tracking-[0.05em]',              img:'h-7 w-auto max-w-[160px] object-contain' }
+  };
+  function logoMarkup(variant = 'header', over = {}){
+    const v = VARIANTS[variant] || VARIANTS.header;
+    const s = { ...state.settings, ...over };
+    const ini = ((s.logoText || 'B').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2) || 'B').toUpperCase();
+    const lockup = `<span class="flex items-center gap-3">
+        <span class="font-serif ${v.box} flex items-center justify-center border-current leading-none" style="border-width:1.5px">${esc(ini)}</span>
+        <span class="font-serif ${v.text} leading-none whitespace-nowrap">${esc(s.logoText)}</span>
+      </span>`;
+    if (s.logoImage) {
+      return `<span class="flex items-center gap-3">
+        <img src="${esc(s.logoImage)}" alt="${esc(s.logoText)}" class="${v.img}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span style="display:none">${lockup}</span></span>`;
+    }
+    return lockup;
+  }
+  function renderBrand(){
+    document.querySelectorAll('.brand-slot').forEach(el => { el.innerHTML = logoMarkup(el.dataset.variant || 'header'); });
+  }
+
+  /* ---------- Footer / contact ---------- */
+  function renderFooter(){
+    const s = state.settings;
+    $('footerMark').textContent = s.logoText;
+    $('copyright').textContent = `© ${new Date().getFullYear()} ${s.logoText} — All rights reserved`;
+    const phone = $('fPhone'); phone.textContent = '+' + digits(); phone.href = 'tel:+' + digits();
+    const mail = $('fEmail'); mail.textContent = s.email; mail.href = 'mailto:' + s.email;
+    $('fAddress').textContent = s.address;
+    $('fHours').textContent = s.hours;
+    document.querySelectorAll('.wa-general').forEach(a => a.href = waGeneralLink());
+  }
+
+  /* ---------- Scroll reveal ---------- */
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting){ en.target.classList.add('revealed'); revealObs.unobserve(en.target); } });
+  }, { threshold:.12, rootMargin:'0px 0px -40px 0px' });
+  const observeReveals = scope => (scope || document).querySelectorAll('[data-reveal]:not(.revealed)').forEach(el => revealObs.observe(el));
+
+  /* ---------- Filter tabs (built from CATEGORIES so admin stays in sync) ---------- */
+  let activeFilter = 'all';
+  function renderFilters(){
+    $('filters').innerHTML = ['All', ...CATEGORIES].map(c => {
+      const val = c === 'All' ? 'all' : c;
+      return `<button class="ftab ${activeFilter === val ? 'active' : ''}" data-filter="${esc(val)}">${esc(c)}</button>`;
+    }).join('');
+  }
+  $('filters').addEventListener('click', e => {
+    const btn = e.target.closest('.ftab'); if (!btn) return;
+    activeFilter = btn.dataset.filter;
+    renderFilters();
+    renderGrid();
+  });
+
+  /* ---------- Portfolio grid (asymmetric editorial stagger) ---------- */
+  const PATTERNS = [
+    { span:'md:col-span-7',          aspect:'aspect-[3/2]'   },
+    { span:'md:col-span-5 md:mt-24', aspect:'aspect-[4/5]'   },
+    { span:'md:col-span-5',          aspect:'aspect-[4/5]'   },
+    { span:'md:col-span-7 md:mt-24', aspect:'aspect-[3/2]'   }
+  ];
+  const grid = $('grid');
+
+  function renderGrid(){
+    const items = activeFilter === 'all' ? state.products : state.products.filter(p => p.category === activeFilter);
+    if (!items.length) {
+      grid.innerHTML = `<div class="md:col-span-12 py-24 text-center">
+        <p class="font-serif italic text-3xl text-ink/40">Nothing here yet.</p>
+        <p class="mt-3 text-sm text-ink2">New pieces are added to this collection regularly.</p></div>`;
+      return;
+    }
+    grid.innerHTML = items.map((p, i) => {
+      const pat = PATTERNS[i % 4];
+      return `<article class="group ${pat.span}" data-reveal style="transition-delay:${(i % 4) * 70}ms">
+        <div class="relative cursor-pointer overflow-hidden bg-cream2 ${pat.aspect}" data-qv="${esc(p.id)}" role="button" tabindex="0" aria-label="Quick view: ${esc(p.title)}">
+          <img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy"
+               class="h-full w-full object-cover transition-transform duration-[1300ms] ease-[cubic-bezier(.19,1,.22,1)] group-hover:scale-[1.06]"
+               onerror="this.onerror=null;this.src='https://picsum.photos/seed/bilal-${esc(p.id)}/900/1100.jpg'" />
+        </div>
+        <div class="mt-6">
+          <p class="kicker text-wood">${esc(p.category)}</p>
+          <h3 class="mt-2 font-serif text-[26px] md:text-3xl leading-snug">${esc(p.title)}</h3>
+          <p class="mt-2 max-w-md text-[15px] leading-relaxed text-ink2">${esc(p.description)}</p>
+          <div class="mt-5 flex flex-wrap items-center gap-4">
+            <a href="${waLink(p.title)}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">${WA_ICON}<span>Inquire on WhatsApp</span></a>
+            <button class="inline-flex items-center gap-1.5 text-[10.5px] tracking-[0.22em] uppercase text-ink/50 hover:text-ink transition-colors" data-qv="${esc(p.id)}">Quick view <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></button>
+          </div>
+        </div>
+      </article>`;
+    }).join('');
+    observeReveals(grid);
+    icons();
+  }
+
+  /* ---------- Overlays ---------- */
+  const qvOverlay = $('qvOverlay'), loginOverlay = $('loginOverlay'), adminOverlay = $('adminOverlay');
+  const anyOpen = () => [qvOverlay, loginOverlay, adminOverlay].some(o => !o.classList.contains('hidden'));
+  function showOverlay(o){ o.classList.remove('hidden'); o.classList.add('flex'); document.body.style.overflow = 'hidden'; }
+  function hideOverlay(o){ o.classList.add('hidden'); o.classList.remove('flex'); if (!anyOpen()) document.body.style.overflow = ''; }
+
+  /* Quick view */
+  function openQV(id){
+    const p = state.products.find(x => x.id === id); if (!p) return;
+    $('qvImg').src = p.image; $('qvImg').alt = p.title;
+    $('qvCat').textContent = p.category;
+    $('qvTitle').textContent = p.title;
+    $('qvDesc').textContent = p.description || 'Made to order — inquire for materials and details.';
+    $('qvWa').href = waLink(p.title);
+    showOverlay(qvOverlay);
+  }
+  grid.addEventListener('click', e => { const t = e.target.closest('[data-qv]'); if (t) openQV(t.dataset.qv); });
+  grid.addEventListener('keydown', e => { if (e.key === 'Enter'){ const t = e.target.closest('[data-qv]'); if (t) openQV(t.dataset.qv); } });
+  qvOverlay.addEventListener('click', e => { if (e.target.closest('[data-qv-close]')) hideOverlay(qvOverlay); });
+
+  /* ---------- Header & mobile menu ---------- */
+  const hdr = $('siteHeader'), menuBtn = $('menuBtn'), mobileMenu = $('mobileMenu');
+  let menuOpen = false;
+  const onScroll = () => hdr.classList.toggle('scrolled', window.scrollY > 50 || menuOpen);
+  window.addEventListener('scroll', onScroll, { passive:true }); onScroll();
+  function setMenu(open){
+    menuOpen = open;
+    mobileMenu.classList.toggle('hidden', !open);
+    menuBtn.innerHTML = `<i data-lucide="${open ? 'x' : 'menu'}" class="w-6 h-6"></i>`;
+    icons(); onScroll();
+  }
+  menuBtn.addEventListener('click', () => setMenu(!menuOpen));
+  mobileMenu.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
+
+  /* ---------- Hidden admin trigger: 5 clicks on the footer copyright ---------- */
+  let cClicks = 0, cTimer = null;
+  $('copyright').addEventListener('click', () => {
+    cClicks++;
+    clearTimeout(cTimer);
+    cTimer = setTimeout(() => cClicks = 0, 2200);
+    if (cClicks === 3) toast('…two more clicks for studio access.');
+    if (cClicks >= 5){ cClicks = 0; openLogin(); }
+  });
+
+  /* ---------- Login (default passphrase: admin123) ---------- */
+  let fails = 0, lockUntil = 0, lockIv = null;
+  const loginBtn = $('loginBtn'), loginPw = $('loginPw'), loginErr = $('loginErr'), loginCard = $('loginCard');
+  function openLogin(){ showOverlay(loginOverlay); hideErr(loginErr); setTimeout(() => loginPw.focus(), 80); }
+  loginOverlay.addEventListener('click', e => { if (e.target.closest('[data-close-login]')) hideOverlay(loginOverlay); });
+  $('pwEye').addEventListener('click', () => {
+    const show = loginPw.type === 'password';
+    loginPw.type = show ? 'text' : 'password';
+    $('pwEye').innerHTML = `<i data-lucide="${show ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
+    icons();
+  });
+  function startLockdown(){
+    loginBtn.disabled = true;
+    clearInterval(lockIv);
+    lockIv = setInterval(() => {
+      const s = Math.ceil((lockUntil - Date.now()) / 1000);
+      if (s <= 0){ clearInterval(lockIv); loginBtn.disabled = false; loginBtn.textContent = 'Unlock Dashboard'; hideErr(loginErr); }
+      else loginBtn.textContent = `Locked — ${s}s`;
+    }, 250);
+  }
+  $('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    if (Date.now() < lockUntil) return;
+    if (loginPw.value === state.settings.password){
+      fails = 0; loginPw.value = '';
+      hideOverlay(loginOverlay);
+      openAdmin();
+      toast('Welcome back, Bilal.');
+      return;
+    }
+    fails++;
+    loginCard.classList.add('shake');
+    setTimeout(() => loginCard.classList.remove('shake'), 550);
+    if (fails >= 3){
+      fails = 0; lockUntil = Date.now() + 30000;
+      showErr(loginErr, 'Too many attempts — locked for 30 seconds.');
+      startLockdown();
+    } else {
+      showErr(loginErr, `Incorrect passphrase — ${3 - fails} attempt${3 - fails > 1 ? 's' : ''} left.`);
+    }
+  });
+
+  /* ---------- Admin dashboard ---------- */
+  function openAdmin(){
+    hideOverlay(loginOverlay);
+    showOverlay(adminOverlay);
+    closeForm();
+    renderAdminList();
+    fillBranding();
+    switchTab('products');
+    icons();
+  }
+  const closeAdmin = () => hideOverlay(adminOverlay);
+  $('btnViewSite').addEventListener('click', closeAdmin);
+  $('btnLogout').addEventListener('click', () => { closeAdmin(); toast('Logged out of Studio Admin.'); });
+
+  function switchTab(name){
+    ['products','branding','security'].forEach(t => {
+      $('tab-' + t).classList.toggle('hidden', t !== name);
+      $('atab-' + t).classList.toggle('active', t === name);
+    });
+  }
+  $('atab-products').addEventListener('click', () => switchTab('products'));
+  $('atab-branding').addEventListener('click', () => switchTab('branding'));
+  $('atab-security').addEventListener('click', () => switchTab('security'));
+
+  /* ----- Product management (Title / Category / Image URL / Description ONLY) ----- */
+  let editingId = null;
+  const prodForm = $('prodForm'), prodList = $('prodList');
+  const fTitle = $('fTitle'), fCat = $('fCat'), fImage = $('fImage'), fDesc = $('fDesc'), fPrev = $('fPrev'), formErr = $('formErr');
+
+  fCat.innerHTML = CATEGORIES.map(c => `<option>${esc(c)}</option>`).join('');
+
+  function updatePreview(){
+    const v = fImage.value.trim();
+    if (v){ fPrev.src = v; fPrev.classList.remove('hidden'); }
+    else fPrev.classList.add('hidden');
+  }
+  fImage.addEventListener('input', updatePreview);
+  fPrev.onerror = () => fPrev.classList.add('hidden');
+
+  function openForm(id){
+    editingId = id || null;
+    const p = id ? state.products.find(x => x.id === id) : null;
+    $('formTitle').textContent = p ? 'Edit item' : 'New item';
+    fTitle.value = p ? p.title : '';
+    fCat.value = p ? p.category : CATEGORIES[0];
+    fImage.value = p ? p.image : '';
+    fDesc.value = p ? p.description : '';
+    updatePreview();
+    hideErr(formErr);
+    prodForm.classList.remove('hidden');
+    prodForm.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    setTimeout(() => fTitle.focus(), 350);
+  }
+  function closeForm(){
+    prodForm.classList.add('hidden');
+    editingId = null;
+    fTitle.value = ''; fDesc.value = ''; fImage.value = '';
+    fPrev.classList.add('hidden');
+    hideErr(formErr);
+  }
+  $('btnAdd').addEventListener('click', () => openForm(null));
+  $('btnCancel').addEventListener('click', closeForm);
+  $('formClose').addEventListener('click', closeForm);
+
+  prodForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const title = fTitle.value.trim();
+    if (!title) return showErr(formErr, 'Please give the piece a title.');
+    const image = fImage.value.trim() || `https://picsum.photos/seed/bi-${Date.now().toString(36)}/900/1100`;
+    const data = { title, category: fCat.value, description: fDesc.value.trim(), image };
+    if (editingId){
+      Object.assign(state.products.find(p => p.id === editingId), data);
+      toast('Item updated — live on the site.');
+    } else {
+      state.products.unshift({ id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5), ...data });
+      toast('Added to the portfolio.');
+    }
+    save(); renderBrand(); renderGrid(); icons();
+    renderAdminList();
+    closeForm();
+  });
+
+  function renderAdminList(){
+    $('prodCount').textContent = `${state.products.length} item${state.products.length === 1 ? '' : 's'} in the portfolio`;
+    prodList.innerHTML = state.products.length ? state.products.map(p => `
+      <div class="flex items-center gap-4 md:gap-6 py-5">
+        <img src="${esc(p.image)}" alt="" class="w-20 h-16 md:w-24 md:h-[70px] object-cover bg-cream2 flex-none"
+             onerror="this.onerror=null;this.src='https://picsum.photos/seed/bilal-fb/200/150.jpg'" />
+        <div class="flex-1 min-w-0">
+          <p class="kicker text-wood">${esc(p.category)}</p>
+          <h4 class="font-serif text-xl md:text-2xl leading-snug truncate">${esc(p.title)}</h4>
+          <p class="text-[13px] text-ink2 truncate">${esc(p.description)}</p>
+        </div>
+        <div class="flex items-center gap-2 flex-none">
+          <button class="icon-btn" data-act="edit" data-id="${esc(p.id)}" aria-label="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+          <button class="icon-btn" data-act="del" data-id="${esc(p.id)}" aria-label="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+        </div>
+      </div>`).join('')
+      : `<p class="py-16 text-center text-sm text-ink2">The portfolio is empty — add your first piece above.</p>`;
+    icons();
+  }
+
+  prodList.addEventListener('click', e => {
+    const b = e.target.closest('button[data-act]'); if (!b) return;
+    if (b.dataset.act === 'edit') return openForm(b.dataset.id);
+    /* two-step delete, with undo */
+    if (b.classList.contains('armed')){
+      const idx = state.products.findIndex(p => p.id === b.dataset.id);
+      if (idx < 0) return;
+      const [item] = state.products.splice(idx, 1);
+      save(); renderGrid(); icons(); renderAdminList();
+      toast(`"${item.title}" deleted`, { action:{ label:'Undo', fn(){
+        state.products.splice(Math.min(idx, state.products.length), 0, item);
+        save(); renderGrid(); icons(); renderAdminList();
+        toast('Item restored.');
+      }}});
+    } else {
+      b.classList.add('armed');
+      b.textContent = 'Delete?';
+      setTimeout(() => {
+        if (!b.isConnected) return;
+        b.classList.remove('armed');
+        b.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+        icons();
+      }, 2600);
+    }
+  });
+
+  /* ----- Branding & contact ----- */
+  const brandPreview = $('brandPreview');
+  function fillBranding(){
+    const s = state.settings;
+    $('bLogoText').value = s.logoText; $('bLogoImage').value = s.logoImage;
+    $('bWhatsapp').value = s.whatsapp; $('bEmail').value = s.email;
+    $('bAddress').value = s.address;  $('bHours').value = s.hours;
+    brandPreview.innerHTML = logoMarkup('header');
+  }
+  /* live logo preview while typing */
+  ['bLogoText','bLogoImage'].forEach(id => $(id).addEventListener('input', () => {
+    brandPreview.innerHTML = logoMarkup('header', {
+      logoText: $('bLogoText').value.trim() || 'Bilal Interior',
+      logoImage: $('bLogoImage').value.trim()
+    });
+  }));
+  $('brandForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const err = $('brandErr');
+    const wt = $('bWhatsapp').value.replace(/\D/g, '');
+    if (!$('bLogoText').value.trim()) return showErr(err, 'Logo text cannot be empty.');
+    if (wt.length < 8) return showErr(err, 'Enter a valid WhatsApp number with country code (e.g. 923001234567).');
+    hideErr(err);
+    Object.assign(state.settings, {
+      logoText: $('bLogoText').value.trim(), logoImage: $('bLogoImage').value.trim(),
+      whatsapp: wt, email: $('bEmail').value.trim(),
+      address: $('bAddress').value.trim(), hours: $('bHours').value.trim()
+    });
+    save(); renderBrand(); renderFooter(); icons();
+    brandPreview.innerHTML = logoMarkup('header');
+    toast('Branding updated — live on the site.');
+  });
+
+  /* ----- Security ----- */
+  $('pwForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const err = $('secErr');
+    const cur = $('sCur').value, nw = $('sNew').value, cf = $('sConf').value;
+    if (cur !== state.settings.password) return showErr(err, 'Current passphrase is incorrect.');
+    if (nw.length < 4) return showErr(err, 'New passphrase must be at least 4 characters.');
+    if (nw !== cf) return showErr(err, 'New passphrases do not match.');
+    hideErr(err);
+    state.settings.password = nw;
+    save();
+    $('pwForm').reset();
+    toast('Passphrase updated.');
+  });
+
+  let resetArm = false, resetTimer = null;
+  $('btnReset').addEventListener('click', () => {
+    const b = $('btnReset');
+    if (resetArm){
+      localStorage.removeItem(KEY);
+      state = JSON.parse(JSON.stringify(DEFAULTS));
+      save();
+      renderBrand(); renderFooter(); renderFilters(); renderGrid(); icons();
+      renderAdminList(); fillBranding();
+      resetArm = false; b.textContent = 'Reset Everything'; b.classList.remove('armed');
+      toast('All website data restored to defaults.');
+    } else {
+      resetArm = true; b.textContent = 'Click again to confirm'; b.classList.add('armed');
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => { resetArm = false; b.textContent = 'Reset Everything'; b.classList.remove('armed'); }, 3000);
+    }
+  });
+
+  /* ---------- Global Escape ---------- */
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (!qvOverlay.classList.contains('hidden')) hideOverlay(qvOverlay);
+    else if (!loginOverlay.classList.contains('hidden')) hideOverlay(loginOverlay);
+    else if (!adminOverlay.classList.contains('hidden')) closeAdmin();
+    else if (menuOpen) setMenu(false);
+  });
+
+  /* ---------- Init ---------- */
+  document.querySelectorAll('.wa-ic').forEach(el => el.innerHTML = WA_ICON);
+  renderBrand();
+  renderFooter();
+  renderFilters();
+  renderGrid();
+  observeReveals(document);
+  icons();
+})();
+</script>
+</body>
+</html>
+```
