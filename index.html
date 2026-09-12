@@ -1,10 +1,12 @@
+Here's the complete IKEA-inspired SPA build. Since `source.unsplash.com` is deprecated, the catalog seeds with **direct `images.unsplash.com` CDN URLs** (each with an automatic picsum fallback so a dead link can never break the grid). The signature moment is the **shoppable hero** — pulsing hotspots on the living-room render open real product cards, IKEA-"Shop the Look" style. Routing is hash-based (back button works, views are deep-linkable), the chat concierge persists conversation history, and the hidden admin (footer link or 5 clicks on the copyright → `admin123`) has full **category CRUD with cascading product assignment** and product CRUD.
 
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Bilal Interior — Bespoke Furniture &amp; 3D Interior Design, Lahore</title>
+<title>Bilal Interior — Premium Furniture &amp; 3D Interior Design, Lahore</title>
 <meta name="description" content="Premium furniture manufacturing, material procurement, and 3D interior design services based in Lahore." />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23221D15'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='36' fill='%23D8BC93' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -32,12 +34,13 @@
   *{ -webkit-tap-highlight-color:transparent; }
   html{ scroll-behavior:smooth; scroll-padding-top:100px; }
   ::selection{ background:#9C6B3A; color:#F5F0E6; }
-  ::-webkit-scrollbar{ width:10px; }
+  ::-webkit-scrollbar{ width:10px; height:10px; }
   ::-webkit-scrollbar-track{ background:#EFE8DA; }
   ::-webkit-scrollbar-thumb{ background:#C9BCA2; border:3px solid #EFE8DA; border-radius:8px; }
   :focus-visible{ outline:2px solid #9C6B3A; outline-offset:3px; }
+  .no-scrollbar::-webkit-scrollbar{ display:none; }
+  .no-scrollbar{ -ms-overflow-style:none; scrollbar-width:none; }
 
-  /* Film grain — barely-there tactile layer over the whole page */
   #grain{ position:fixed; inset:0; z-index:300; pointer-events:none; opacity:.05;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
@@ -66,39 +69,54 @@
     transition:background-color .35s,color .35s,border-color .35s; }
   .btn-hdr:hover{ background:#9C6B3A; border-color:#9C6B3A; color:#F5F0E6; }
 
-  /* Header theme flip */
+  /* Header */
   #siteHeader{ color:#F5F0E6; transition:background-color .5s,color .5s,box-shadow .5s; }
-  #siteHeader.scrolled{ background:rgba(245,240,230,.92); backdrop-filter:blur(14px);
+  #siteHeader.scrolled{ background:rgba(245,240,230,.94); backdrop-filter:blur(14px);
     color:#221D15; box-shadow:0 1px 0 #DCD2BF; }
-
-  .nav-link{ position:relative; }
+  .nav-link{ position:relative; white-space:nowrap; opacity:.8; transition:opacity .3s; }
+  .nav-link:hover{ opacity:1; }
+  .nav-link.active{ opacity:1; }
   .nav-link::after{ content:''; position:absolute; left:0; bottom:-6px; height:1px; width:100%;
     background:currentColor; transform:scaleX(0); transform-origin:right; transition:transform .4s cubic-bezier(.19,1,.22,1); }
-  .nav-link:hover::after{ transform:scaleX(1); transform-origin:left; }
+  .nav-link:hover::after,.nav-link.active::after{ transform:scaleX(1); transform-origin:left; }
 
   /* Hero */
   @keyframes kb{ from{ transform:scale(1); } to{ transform:scale(1.1); } }
-  .kenburns{ animation:kb 24s ease-in-out infinite alternate; }
-  .hline{ display:block; overflow:hidden; padding-bottom:.08em; margin-bottom:-.06em; }
-  .hline>span{ display:block; transform:translateY(115%); animation:rise 1.2s cubic-bezier(.19,1,.22,1) forwards; }
-  .hline:nth-of-type(1)>span{ animation-delay:.15s; }
-  .hline:nth-of-type(2)>span{ animation-delay:.32s; }
-  @keyframes rise{ to{ transform:translateY(0); } }
-  .fade-up{ opacity:0; transform:translateY(18px); animation:fup 1s cubic-bezier(.19,1,.22,1) forwards; }
+  .kenburns{ animation:kb 26s ease-in-out infinite alternate; }
+  .fade-up{ opacity:0; transform:translateY(20px); animation:fup 1s cubic-bezier(.19,1,.22,1) forwards; }
   @keyframes fup{ to{ opacity:1; transform:none; } }
   .scroll-line{ position:relative; width:1px; height:52px; background:rgba(245,240,230,.25); overflow:hidden; }
   .scroll-line::after{ content:''; position:absolute; left:0; top:-40%; width:100%; height:40%;
     background:#D8BC93; animation:drip 2.2s cubic-bezier(.65,0,.35,1) infinite; }
   @keyframes drip{ to{ top:110%; } }
 
-  /* Scroll reveals */
-  [data-reveal]{ opacity:0; transform:translateY(30px);
-    transition:opacity .9s cubic-bezier(.19,1,.22,1),transform .9s cubic-bezier(.19,1,.22,1); }
-  [data-reveal].revealed{ opacity:1; transform:none; }
+  /* Shoppable hotspots */
+  .hotspot{ position:absolute; width:36px; height:36px; transform:translate(-50%,-50%);
+    cursor:pointer; background:none; border:none; padding:0; }
+  .hotspot::before{ content:''; position:absolute; inset:0; border-radius:9999px;
+    background:rgba(216,188,147,.4); animation:hs 2.4s cubic-bezier(.2,.6,.35,1) infinite; }
+  .hotspot::after{ content:''; position:absolute; inset:10px; border-radius:9999px;
+    background:#F5F0E6; border:2px solid #221D15; transition:transform .3s; }
+  .hotspot:hover::after{ transform:scale(1.25); }
+  @keyframes hs{ 0%{ transform:scale(.55); opacity:.9; } 70%{ transform:scale(1.5); opacity:0; } 100%{ opacity:0; } }
 
-  /* Filter tabs */
+  /* Product grid */
+  .prod-img{ transition:transform 1.2s cubic-bezier(.19,1,.22,1); }
+  .group:hover .prod-img{ transform:scale(1.06); }
+  .qv-pill{ position:absolute; left:50%; bottom:18px; transform:translate(-50%,10px);
+    opacity:0; transition:opacity .35s,transform .35s; pointer-events:none; }
+  .group:hover .qv-pill{ opacity:1; transform:translate(-50%,0); pointer-events:auto; }
+  .badge{ position:absolute; top:14px; left:14px; font-size:10px; letter-spacing:.18em;
+    text-transform:uppercase; background:#221D15; color:#F5F0E6; padding:.38rem .65rem; }
+  .badge-new{ background:#9C6B3A; }
+
+  /* View transitions */
+  #view{ transition:opacity .22s ease, transform .22s ease; min-height:62vh; }
+  #view.vfading{ opacity:0; transform:translateY(10px); }
+
+  /* Tabs */
   .ftab,.atab{ position:relative; font-size:11.5px; letter-spacing:.2em; text-transform:uppercase;
-    color:rgba(34,29,21,.45); transition:color .3s; cursor:pointer; background:none; border:none; padding:0 0 8px; }
+    color:rgba(34,29,21,.45); transition:color .3s; cursor:pointer; background:none; border:none; padding:0 0 8px; white-space:nowrap; }
   .ftab::after,.atab::after{ content:''; position:absolute; left:0; bottom:0; height:1px; width:100%;
     background:#9C6B3A; transform:scaleX(0); transform-origin:right; transition:transform .45s cubic-bezier(.19,1,.22,1); }
   .ftab:hover,.atab:hover{ color:#221D15; }
@@ -106,14 +124,17 @@
   .ftab.active::after,.atab.active::after{ transform:scaleX(1); transform-origin:left; }
   .atab{ padding:1.1rem 0; margin-right:2.5rem; }
 
-  /* Fields */
+  /* Scroll reveals */
+  [data-reveal]{ opacity:0; transform:translateY(30px);
+    transition:opacity .9s cubic-bezier(.19,1,.22,1),transform .9s cubic-bezier(.19,1,.22,1); }
+  [data-reveal].revealed{ opacity:1; transform:none; }
+
+  /* Fields & admin */
   .field{ width:100%; background:rgba(255,255,255,.65); border:1px solid #DCD2BF; padding:.8rem 1rem;
     font-size:14px; color:#221D15; outline:none; transition:border-color .3s,box-shadow .3s; }
   .field:focus{ border-color:#9C6B3A; box-shadow:0 0 0 3px rgba(156,107,58,.12); outline:none; }
   .field::placeholder{ color:#A79B85; }
   .flabel{ display:block; font-size:10.5px; letter-spacing:.22em; text-transform:uppercase; color:#5B5142; margin-bottom:.5rem; }
-
-  /* Admin row buttons */
   .icon-btn{ display:inline-flex; align-items:center; justify-content:center; gap:.45rem;
     min-width:38px; height:38px; padding:0 .55rem; border:1px solid #DCD2BF; background:transparent;
     color:#5B5142; cursor:pointer; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
@@ -121,6 +142,8 @@
   .icon-btn:hover{ background:#221D15; border-color:#221D15; color:#F5F0E6; }
   .icon-btn.armed{ border-color:#B4552D; color:#B4552D; background:rgba(180,85,45,.08); }
   .icon-btn.armed:hover{ background:#B4552D; border-color:#B4552D; color:#F5F0E6; }
+  .chip{ font-size:9.5px; letter-spacing:.18em; text-transform:uppercase; border:1px solid #DCD2BF;
+    color:#5B5142; padding:.25rem .55rem; white-space:nowrap; }
 
   /* Modals & toasts */
   .modal-panel{ animation:panelIn .45s cubic-bezier(.19,1,.22,1); }
@@ -129,7 +152,7 @@
   @keyframes bfade{ from{ opacity:0; } to{ opacity:1; } }
   .shake{ animation:shake .5s; }
   @keyframes shake{ 20%{transform:translateX(-8px);} 40%{transform:translateX(7px);} 60%{transform:translateX(-5px);} 80%{transform:translateX(3px);} }
-  #toasts{ position:fixed; right:1.25rem; bottom:1.25rem; z-index:210; display:flex; flex-direction:column; gap:.6rem; align-items:flex-end; }
+  #toasts{ position:fixed; left:1.25rem; bottom:1.25rem; z-index:210; display:flex; flex-direction:column; gap:.6rem; align-items:flex-start; }
   .toast{ display:flex; align-items:center; gap:1.1rem; background:#221D15; color:#F5F0E6;
     padding:.9rem 1.2rem; font-size:13px; border-left:2px solid #9C6B3A;
     box-shadow:0 12px 30px rgba(34,29,21,.28); max-width:min(92vw,400px);
@@ -138,10 +161,24 @@
   .toast-act{ font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:#D8BC93;
     border-bottom:1px solid #D8BC93; padding-bottom:1px; cursor:pointer; background:none; border-top:none; border-left:none; border-right:none; }
 
+  /* Chat widget */
+  #chatPanel{ transform-origin:bottom right; transition:opacity .3s cubic-bezier(.19,1,.22,1),transform .3s cubic-bezier(.19,1,.22,1); }
+  #chatPanel.closed{ opacity:0; transform:translateY(14px) scale(.97); pointer-events:none; }
+  .bubble{ max-width:82%; padding:.7rem .95rem; font-size:13.5px; line-height:1.5; }
+  .bubble-bot{ background:#fff; border:1px solid #E4DBC8; color:#221D15; border-radius:14px 14px 14px 3px; }
+  .bubble-me{ background:#221D15; color:#F5F0E6; border-radius:14px 14px 3px 14px; }
+  .tstamp{ font-size:9.5px; letter-spacing:.08em; color:rgba(34,29,21,.35); margin-top:.3rem; }
+  .bubble-me .tstamp{ color:rgba(245,240,230,.4); }
+  .tdot{ width:6px; height:6px; border-radius:9999px; background:#5B5142; opacity:.35; animation:tblink 1.2s infinite; }
+  .tdot:nth-child(2){ animation-delay:.18s; } .tdot:nth-child(3){ animation-delay:.36s; }
+  @keyframes tblink{ 0%,80%,100%{ opacity:.25; transform:translateY(0); } 40%{ opacity:1; transform:translateY(-2px); } }
+  @keyframes fabpulse{ 0%,100%{ box-shadow:0 10px 28px rgba(34,29,21,.35); } 50%{ box-shadow:0 10px 34px rgba(156,107,58,.55); } }
+  #chatFab{ animation:fabpulse 3.5s ease-in-out infinite; }
+
   @media (prefers-reduced-motion:reduce){
-    .kenburns,.scroll-line::after{ animation:none; }
+    .kenburns,.scroll-line::after,.hotspot::before,#chatFab{ animation:none; }
     [data-reveal]{ transition:none; opacity:1; transform:none; }
-    .hline>span{ animation:none; transform:none; }
+    .fade-up{ animation:none; opacity:1; transform:none; }
   }
 </style>
 </head>
@@ -151,129 +188,39 @@
 
 <!-- ============ HEADER ============ -->
 <header id="siteHeader" class="fixed top-0 inset-x-0 z-50">
-  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between gap-6">
-    <a href="#hero" class="brand-slot block" data-variant="header" aria-label="Bilal Interior — home"></a>
-    <nav class="hidden md:flex items-center gap-10 text-[11.5px] tracking-[0.22em] uppercase">
-      <a href="#collection" class="nav-link">Collection</a>
-      <a href="#services" class="nav-link">Services</a>
-      <a href="#contact" class="nav-link">Contact</a>
-    </nav>
-    <div class="flex items-center gap-3">
+  <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center gap-6">
+    <a href="#/" class="brand-slot block flex-none" data-variant="header" aria-label="Bilal Interior — home"></a>
+    <nav id="mainNav" class="hidden lg:flex items-center gap-7 flex-1 overflow-x-auto no-scrollbar text-[11px] tracking-[0.2em] uppercase"></nav>
+    <div class="flex items-center gap-3 ml-auto flex-none">
       <a href="#" target="_blank" rel="noopener" class="btn-hdr wa-general hidden sm:inline-flex">
         <span class="wa-ic"></span><span>Inquire</span>
       </a>
-      <button id="menuBtn" class="md:hidden p-2" aria-label="Toggle menu"><i data-lucide="menu" class="w-6 h-6"></i></button>
+      <button id="menuBtn" class="lg:hidden p-2" aria-label="Toggle menu"><i data-lucide="menu" class="w-6 h-6"></i></button>
     </div>
   </div>
-  <div id="mobileMenu" class="md:hidden hidden border-t border-line bg-cream text-ink">
-    <nav class="px-6 py-6 flex flex-col gap-5 text-[12px] tracking-[0.22em] uppercase">
-      <a href="#collection" class="mm-link">Collection</a>
-      <a href="#services" class="mm-link">Services</a>
-      <a href="#contact" class="mm-link">Contact</a>
-      <a href="#" target="_blank" rel="noopener" class="btn btn-dark btn-sm wa-general mt-2 justify-center">
-        <span class="wa-ic"></span><span>WhatsApp Us</span>
-      </a>
-    </nav>
+  <div id="mobileMenu" class="lg:hidden hidden border-t border-line bg-cream text-ink">
+    <nav id="mobileNav" class="px-6 py-6 flex flex-col gap-5 text-[12px] tracking-[0.2em] uppercase max-h-[70vh] overflow-y-auto"></nav>
   </div>
 </header>
 
-<main>
-  <!-- ============ HERO ============ -->
-  <section id="hero" class="relative h-screen min-h-[640px] overflow-hidden bg-ink">
-    <div class="absolute inset-0 kenburns">
-      <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=2000&auto=format&fit=crop"
-           alt="Modern living room interior designed by Bilal Interior"
-           class="w-full h-full object-cover"
-           onerror="this.onerror=null;this.src='https://picsum.photos/seed/bilal-hero/1920/1080.jpg'" />
-    </div>
-    <div class="absolute inset-0 bg-ink/45" aria-hidden="true"></div>
-    <div class="absolute inset-4 lg:inset-6 border border-cream/25 pointer-events-none z-10" aria-hidden="true"></div>
-    <div class="hidden lg:block absolute left-10 top-1/2 -translate-y-1/2 z-10 text-cream/45 text-[10px] tracking-[0.45em] uppercase"
-         style="writing-mode:vertical-rl">Furniture · Materials · 3D Design — Lahore</div>
+<!-- ============ SPA VIEW MOUNT ============ -->
+<main id="view"></main>
 
-    <div class="relative z-10 h-full max-w-7xl mx-auto px-8 lg:px-16 flex flex-col justify-end pb-28 lg:pb-32">
-      <p class="fade-up kicker text-sand" style="animation-delay:.05s">Bilal Interior — Bespoke Furniture &amp; Interior Design</p>
-      <h1 class="mt-6 font-serif font-medium text-cream" style="font-size:clamp(3rem,8.5vw,7rem);line-height:.98">
-        <span class="hline"><span>Composed in Lahore,</span></span>
-        <span class="hline"><span><em class="italic text-sand">crafted</em> for life.</span></span>
-      </h1>
-      <div class="fade-up mt-10 flex flex-wrap gap-4" style="animation-delay:.7s">
-        <a href="#collection" class="btn btn-light">View Collection <i data-lucide="arrow-down" class="w-4 h-4"></i></a>
-        <a href="#" target="_blank" rel="noopener" class="btn btn-ghost wa-general"><span class="wa-ic"></span><span>Book a Consultation</span></a>
-      </div>
-    </div>
-
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden md:flex flex-col items-center gap-3 text-cream/60">
-      <span class="text-[10px] tracking-[0.35em] uppercase">Scroll</span>
-      <span class="scroll-line"></span>
-    </div>
-  </section>
-
-  <!-- ============ SERVICES ============ -->
-  <section id="services" class="py-24 lg:py-32">
-    <div class="max-w-7xl mx-auto px-6 lg:px-10">
-      <div class="max-w-2xl" data-reveal>
-        <p class="kicker text-wood">What We Do</p>
-        <h2 class="mt-4 font-serif text-5xl lg:text-6xl leading-[1.05]">Three crafts, <em class="italic">one</em> studio.</h2>
-      </div>
-      <div class="mt-14 grid md:grid-cols-3 gap-x-10 gap-y-12">
-        <div class="border-t border-line pt-8" data-reveal>
-          <span class="font-serif italic text-5xl text-sand">01</span>
-          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">Furniture Manufacturing</h3>
-          <p class="mt-3 text-sm leading-relaxed text-ink2">Solid-wood pieces built to order in our own Lahore workshop — from a single statement chair to a full home of bespoke joinery.</p>
-        </div>
-        <div class="border-t border-line pt-8" data-reveal style="transition-delay:.1s">
-          <span class="font-serif italic text-5xl text-sand">02</span>
-          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">Material Procurement</h3>
-          <p class="mt-3 text-sm leading-relaxed text-ink2">Hardwoods, natural stone, textiles and hardware — sourced, vetted and sampled for every project, so nothing is left to chance.</p>
-        </div>
-        <div class="border-t border-line pt-8" data-reveal style="transition-delay:.2s">
-          <span class="font-serif italic text-5xl text-sand">03</span>
-          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">3D Interior Design</h3>
-          <p class="mt-3 text-sm leading-relaxed text-ink2">Photoreal spatial renders and complete layouts — walk through your room, and refine it, before a single plank is cut.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ COLLECTION ============ -->
-  <section id="collection" class="py-24 lg:py-28 border-t border-line">
-    <div class="max-w-7xl mx-auto px-6 lg:px-10">
-      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8" data-reveal>
-        <div>
-          <p class="kicker text-wood">Portfolio</p>
-          <h2 class="mt-4 font-serif text-6xl lg:text-7xl leading-[1.02]">Selected<br /><em class="italic">work</em></h2>
-        </div>
-        <p class="max-w-sm text-[15px] leading-relaxed text-ink2">Every piece is made to order and quoted privately over WhatsApp — so you'll never find price tags here, only work we're proud of.</p>
-      </div>
-
-      <div id="filters" class="mt-12 flex flex-wrap gap-x-9 gap-y-3 border-b border-line" data-reveal></div>
-
-      <div id="grid" class="mt-16 grid grid-cols-1 md:grid-cols-12 gap-x-8 gap-y-16 lg:gap-y-24"></div>
-    </div>
-  </section>
-</main>
-
-<!-- ============ FOOTER / ABOUT & CONTACT ============ -->
-<footer id="contact" class="bg-ink text-cream border-t border-cream/10">
+<!-- ============ FOOTER ============ -->
+<footer id="siteFooter" class="bg-ink text-cream border-t border-cream/10">
   <div class="max-w-7xl mx-auto px-6 lg:px-10 pt-16 pb-10">
     <div class="overflow-hidden select-none" aria-hidden="true">
       <p id="footerMark" class="font-serif text-[15vw] leading-[0.82] text-cream/[0.06] whitespace-nowrap text-center translate-y-[14%]">Bilal Interior</p>
     </div>
-
     <div class="mt-14 grid lg:grid-cols-12 gap-12">
       <div class="lg:col-span-5">
-        <a href="#hero" class="brand-slot inline-block" data-variant="footer"></a>
+        <a href="#/" class="brand-slot inline-block" data-variant="footer"></a>
         <p class="mt-6 text-cream/60 max-w-sm leading-relaxed text-[15px]">Premium furniture manufacturing, material procurement, and 3D interior design services based in Lahore.</p>
         <a href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm wa-general mt-8"><span class="wa-ic"></span><span>Message us on WhatsApp</span></a>
       </div>
       <div class="lg:col-span-3">
-        <p class="kicker text-cream/40">Explore</p>
-        <ul class="mt-5 space-y-3 text-[15px]">
-          <li><a href="#collection" class="text-cream/70 hover:text-sand transition-colors">Collection</a></li>
-          <li><a href="#services" class="text-cream/70 hover:text-sand transition-colors">Services</a></li>
-          <li><a href="#hero" class="text-cream/70 hover:text-sand transition-colors">Back to top</a></li>
-        </ul>
+        <p class="kicker text-cream/40">Collections</p>
+        <ul id="footerCats" class="mt-5 space-y-3 text-[15px]"></ul>
       </div>
       <div class="lg:col-span-4">
         <p class="kicker text-cream/40">Contact</p>
@@ -285,19 +232,55 @@
         </ul>
       </div>
     </div>
-
     <div class="mt-16 pt-8 border-t border-cream/10 flex flex-col md:flex-row justify-between items-center gap-4 text-[10.5px] tracking-[0.18em] uppercase text-cream/40">
-      <!-- Hidden admin: click this copyright line 5× quickly → passphrase "admin123" -->
-      <p id="copyright" class="cursor-pointer select-none" title="©">© 2025 Bilal Interior — All rights reserved</p>
+      <div class="flex items-center gap-4">
+        <p id="copyright" class="cursor-pointer select-none">© 2025 Bilal Interior — All rights reserved</p>
+        <!-- Hidden admin entry -->
+        <button id="adminLink" class="opacity-20 hover:opacity-100 transition-opacity" aria-label="Studio admin">Studio</button>
+      </div>
       <p>Crafted in Lahore, Pakistan</p>
     </div>
   </div>
 </footer>
 
+<!-- ============ CHAT WIDGET ============ -->
+<div id="chatPanel" class="closed fixed bottom-24 right-5 z-[80] w-[380px] max-w-[92vw] h-[540px] max-h-[72vh] flex flex-col bg-cream border border-line shadow-[0_24px_60px_rgba(34,29,21,.3)]" role="dialog" aria-label="Studio concierge chat">
+  <div class="flex-none bg-ink text-cream px-5 py-4 flex items-center gap-3">
+    <span class="w-9 h-9 bg-wood flex items-center justify-center flex-none"><i data-lucide="message-circle" class="w-4.5 h-4.5 w-5 h-5"></i></span>
+    <div class="flex-1 min-w-0">
+      <p class="font-serif text-xl leading-tight">Studio Concierge</p>
+      <p class="text-[10px] tracking-[0.2em] uppercase text-cream/50">Typically replies in minutes</p>
+    </div>
+    <button id="chatClear" class="p-2 text-cream/50 hover:text-cream transition-colors" aria-label="Clear conversation"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+    <button id="chatClose" class="p-2 text-cream/50 hover:text-cream transition-colors" aria-label="Close chat"><i data-lucide="x" class="w-5 h-5"></i></button>
+  </div>
+  <div id="chatMsgs" class="flex-1 overflow-y-auto px-4 py-4 space-y-3"></div>
+  <div id="chatTyping" class="hidden px-5 pb-1"><span class="inline-flex items-center gap-1 bg-white border border-[#E4DBC8] rounded-full px-3 py-2"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></span></div>
+  <form id="chatForm" class="flex-none border-t border-line p-3 flex items-center gap-2 bg-cream">
+    <input id="chatInput" class="field !py-2.5" placeholder="Ask about furniture, 3D design…" autocomplete="off" />
+    <button type="submit" class="w-11 h-11 flex-none bg-ink text-cream flex items-center justify-center hover:bg-wood transition-colors" aria-label="Send"><i data-lucide="send" class="w-4 h-4"></i></button>
+  </form>
+</div>
+<button id="chatFab" class="fixed bottom-5 right-5 z-[80] w-14 h-14 bg-ink text-cream flex items-center justify-center shadow-[0_10px_28px_rgba(34,29,21,.35)] hover:bg-wood transition-colors" aria-label="Open chat"><i data-lucide="message-circle" class="w-6 h-6"></i></button>
+
+<!-- ============ SHOP THE LOOK MODAL ============ -->
+<div id="lookOverlay" class="fixed inset-0 z-[85] hidden items-center justify-center p-4 md:p-8" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 bg-ink/70 backdrop-blur-sm backdrop-fade" data-look-close></div>
+  <div class="modal-panel relative w-full max-w-5xl max-h-[86vh] overflow-y-auto bg-cream border border-line">
+    <button data-look-close class="absolute top-4 right-4 z-10 w-10 h-10 bg-ink text-cream flex items-center justify-center hover:bg-wood transition-colors" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <div class="p-8 lg:p-12">
+      <p class="kicker text-wood">Shop the Look</p>
+      <h3 class="mt-3 font-serif text-4xl leading-tight">The model living room, <em class="italic">piece by piece.</em></h3>
+      <p class="mt-3 text-[15px] text-ink2 max-w-lg">Everything below is made to order in our Lahore workshop. Tap any piece to inquire on WhatsApp.</p>
+      <div id="lookGrid" class="mt-10 grid sm:grid-cols-2 md:grid-cols-3 gap-8"></div>
+    </div>
+  </div>
+</div>
+
 <!-- ============ QUICK VIEW MODAL ============ -->
-<div id="qvOverlay" class="fixed inset-0 z-[85] hidden items-center justify-center p-4 md:p-8" role="dialog" aria-modal="true">
+<div id="qvOverlay" class="fixed inset-0 z-[86] hidden items-center justify-center p-4 md:p-8" role="dialog" aria-modal="true">
   <div class="absolute inset-0 bg-ink/70 backdrop-blur-sm backdrop-fade" data-qv-close></div>
-  <div class="modal-panel relative w-full max-w-5xl max-h-[88vh] overflow-y-auto bg-cream grid md:grid-cols-2">
+  <div class="modal-panel relative w-full max-w-4xl max-h-[88vh] overflow-y-auto bg-cream grid md:grid-cols-2">
     <button data-qv-close class="absolute top-4 right-4 z-10 w-10 h-10 bg-ink text-cream flex items-center justify-center hover:bg-wood transition-colors" aria-label="Close quick view"><i data-lucide="x" class="w-5 h-5"></i></button>
     <div class="bg-cream2">
       <img id="qvImg" src="" alt="" class="w-full h-64 md:h-full object-cover" />
@@ -308,7 +291,7 @@
       <p id="qvDesc" class="mt-5 text-[15px] leading-relaxed text-ink2"></p>
       <div class="mt-auto pt-10">
         <a id="qvWa" href="#" target="_blank" rel="noopener" class="btn btn-dark w-full justify-center"><span class="wa-ic"></span><span>Inquire on WhatsApp</span></a>
-        <p class="mt-3 text-center text-[11px] tracking-[0.15em] uppercase text-ink/40">Typical response — under two hours</p>
+        <p class="mt-3 text-center text-[11px] tracking-[0.15em] uppercase text-ink/40">Quoted privately — no prices online</p>
       </div>
     </div>
   </div>
@@ -321,7 +304,7 @@
     <button data-close-login class="absolute top-4 right-4 text-ink/40 hover:text-ink transition-colors" aria-label="Close login"><i data-lucide="x" class="w-5 h-5"></i></button>
     <div class="w-12 h-12 bg-ink text-cream flex items-center justify-center"><i data-lucide="lock" class="w-5 h-5"></i></div>
     <h3 class="mt-6 font-serif text-3xl">Studio Access</h3>
-    <p class="mt-2 text-sm text-ink2">Enter the admin passphrase to manage the portfolio.</p>
+    <p class="mt-2 text-sm text-ink2">Enter the admin passphrase to manage the store.</p>
     <form id="loginForm" class="mt-6" novalidate>
       <label class="flabel" for="loginPw">Passphrase</label>
       <div class="relative">
@@ -351,41 +334,48 @@
       </div>
     </div>
   </div>
-  <div class="flex-none border-b border-line">
+  <div class="flex-none border-b border-line overflow-x-auto no-scrollbar">
     <div class="max-w-6xl mx-auto px-5 lg:px-8 flex">
-      <button id="atab-products" class="atab active">Portfolio</button>
+      <button id="atab-categories" class="atab active">Categories</button>
+      <button id="atab-products" class="atab">Products</button>
       <button id="atab-branding" class="atab">Branding &amp; Contact</button>
-      <button id="atab-security" class="atab">Security</button>
+      <button id="atab-data" class="atab">Data</button>
     </div>
   </div>
 
   <div class="flex-1 overflow-y-auto">
-    <!-- PORTFOLIO TAB -->
-    <section id="tab-products" class="max-w-6xl mx-auto px-5 lg:px-8 py-10">
+    <!-- CATEGORIES TAB -->
+    <section id="tab-categories" class="max-w-3xl mx-auto px-5 lg:px-8 py-10">
+      <h2 class="font-serif text-4xl">Categories</h2>
+      <p class="mt-1 text-[13px] text-ink2">These become the live navigation links. Renaming a category keeps all its products assigned.</p>
+      <form id="catAddForm" class="mt-8 flex gap-3" novalidate>
+        <input id="catName" class="field flex-1" placeholder="New category name, e.g. Modern Sofas" />
+        <button type="submit" class="btn btn-dark btn-sm flex-none"><i data-lucide="plus" class="w-4 h-4"></i><span>Add</span></button>
+      </form>
+      <p id="catErr" class="hidden mt-3 text-[13px] text-clay"></p>
+      <div id="catList" class="mt-8 border-y border-line divide-y divide-line"></div>
+    </section>
+
+    <!-- PRODUCTS TAB -->
+    <section id="tab-products" class="hidden max-w-6xl mx-auto px-5 lg:px-8 py-10">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 class="font-serif text-4xl">Portfolio Items</h2>
+          <h2 class="font-serif text-4xl">Products</h2>
           <p id="prodCount" class="mt-1 text-[13px] text-ink2"></p>
         </div>
-        <button id="btnAdd" class="btn btn-dark btn-sm"><i data-lucide="plus" class="w-4 h-4"></i><span>Add Item</span></button>
+        <button id="btnAdd" class="btn btn-dark btn-sm"><i data-lucide="plus" class="w-4 h-4"></i><span>Add Product</span></button>
       </div>
-      <p class="mt-3 text-[13px] text-ink/45 max-w-lg">Quoting happens privately over WhatsApp — the form only manages title, description, category and image. No price fields, by design.</p>
+      <p class="mt-3 text-[13px] text-ink/45 max-w-lg">Quoting happens privately over WhatsApp — no price fields exist in this store, by design.</p>
 
       <form id="prodForm" class="hidden mt-8 border border-line bg-white/50 p-6 lg:p-8" novalidate>
         <div class="flex items-center justify-between">
-          <h3 id="formTitle" class="font-serif text-2xl">New item</h3>
+          <h3 id="formTitle" class="font-serif text-2xl">New product</h3>
           <button type="button" id="formClose" class="icon-btn" aria-label="Close form"><i data-lucide="x" class="w-4 h-4"></i></button>
         </div>
         <div class="mt-6 grid md:grid-cols-2 gap-6">
           <div class="space-y-5">
-            <div>
-              <label class="flabel" for="fTitle">Title</label>
-              <input id="fTitle" class="field" placeholder="e.g. Denim Upholstered Stool" />
-            </div>
-            <div>
-              <label class="flabel" for="fCat">Category</label>
-              <select id="fCat" class="field"></select>
-            </div>
+            <div><label class="flabel" for="fTitle">Title</label><input id="fTitle" class="field" placeholder="e.g. Marlow Modular Sofa" /></div>
+            <div><label class="flabel" for="fCat">Category</label><select id="fCat" class="field"></select></div>
             <div>
               <label class="flabel" for="fImage">Image URL</label>
               <input id="fImage" class="field" placeholder="https://… (leave blank to auto-generate)" />
@@ -393,13 +383,10 @@
             </div>
           </div>
           <div class="flex flex-col">
-            <div class="flex-1">
-              <label class="flabel" for="fDesc">Description</label>
-              <textarea id="fDesc" rows="9" class="field resize-none" placeholder="Materials, finish, design style…"></textarea>
-            </div>
+            <div class="flex-1"><label class="flabel" for="fDesc">Description</label><textarea id="fDesc" rows="9" class="field resize-none" placeholder="Materials, finish, dimensions…"></textarea></div>
             <p id="formErr" class="hidden mt-3 text-[13px] text-clay"></p>
             <div class="mt-4 flex gap-3">
-              <button type="submit" class="btn btn-dark btn-sm flex-1"><i data-lucide="check" class="w-4 h-4"></i><span>Save Item</span></button>
+              <button type="submit" class="btn btn-dark btn-sm flex-1"><i data-lucide="check" class="w-4 h-4"></i><span>Save Product</span></button>
               <button type="button" id="btnCancel" class="btn btn-outline btn-sm flex-1">Cancel</button>
             </div>
           </div>
@@ -435,23 +422,33 @@
       </form>
     </section>
 
-    <!-- SECURITY TAB -->
-    <section id="tab-security" class="hidden max-w-3xl mx-auto px-5 lg:px-8 py-10">
-      <h2 class="font-serif text-4xl">Security</h2>
-      <form id="pwForm" class="mt-8 border border-line bg-white/50 p-6 space-y-5 max-w-xl" novalidate>
-        <h3 class="font-serif text-2xl">Change passphrase</h3>
-        <div><label class="flabel" for="sCur">Current passphrase</label><input id="sCur" type="password" class="field" autocomplete="current-password" /></div>
-        <div class="grid sm:grid-cols-2 gap-5">
-          <div><label class="flabel" for="sNew">New passphrase</label><input id="sNew" type="password" class="field" autocomplete="new-password" /></div>
-          <div><label class="flabel" for="sConf">Confirm new</label><input id="sConf" type="password" class="field" autocomplete="new-password" /></div>
-        </div>
-        <p id="secErr" class="hidden text-[13px] text-clay"></p>
-        <button type="submit" class="btn btn-dark btn-sm"><i data-lucide="key-round" class="w-4 h-4"></i><span>Update Passphrase</span></button>
-      </form>
-      <div class="mt-10 border border-clay/40 bg-clay/5 p-6 max-w-xl">
+    <!-- DATA TAB -->
+    <section id="tab-data" class="hidden max-w-3xl mx-auto px-5 lg:px-8 py-10 space-y-10">
+      <div>
+        <h2 class="font-serif text-4xl">Data</h2>
+        <p class="mt-1 text-[13px] text-ink2">Everything lives in this browser's localStorage under a single namespaced key.</p>
+      </div>
+      <div class="border border-line bg-white/50 p-6">
+        <h3 class="font-serif text-2xl">Conversations</h3>
+        <p id="chatStat" class="mt-2 text-[13px] text-ink2"></p>
+        <button id="btnClearChat" class="btn btn-outline btn-sm mt-4">Clear Chat History</button>
+      </div>
+      <div class="border border-clay/40 bg-clay/5 p-6">
         <h3 class="font-serif text-2xl text-clay">Reset website data</h3>
-        <p class="mt-2 text-[13px] text-ink2">Restores the default portfolio and branding, and re-enables the default passphrase. This cannot be undone.</p>
+        <p class="mt-2 text-[13px] text-ink2">Restores the default catalog, categories, branding and passphrase, and clears the chat. This cannot be undone.</p>
         <button id="btnReset" class="btn btn-clay btn-sm mt-5">Reset Everything</button>
+      </div>
+      <div class="border border-line bg-white/50 p-6">
+        <h3 class="font-serif text-2xl">Change passphrase</h3>
+        <form id="pwForm" class="mt-5 space-y-5" novalidate>
+          <div><label class="flabel" for="sCur">Current passphrase</label><input id="sCur" type="password" class="field" autocomplete="current-password" /></div>
+          <div class="grid sm:grid-cols-2 gap-5">
+            <div><label class="flabel" for="sNew">New passphrase</label><input id="sNew" type="password" class="field" autocomplete="new-password" /></div>
+            <div><label class="flabel" for="sConf">Confirm new</label><input id="sConf" type="password" class="field" autocomplete="new-password" /></div>
+          </div>
+          <p id="secErr" class="hidden text-[13px] text-clay"></p>
+          <button type="submit" class="btn btn-dark btn-sm"><i data-lucide="key-round" class="w-4 h-4"></i><span>Update Passphrase</span></button>
+        </form>
       </div>
     </section>
   </div>
@@ -461,66 +458,97 @@
 
 <script>
 /* =====================================================
-   Bilal Interior — single-file app
-   Hidden admin: click the footer copyright 5× →
-   passphrase "admin123" (changeable in Security tab).
-   Catalog + branding persist to localStorage.
+   Bilal Interior — SPA
+   Modules: STORE · UI KIT · WHATSAPP · BRAND · ROUTER ·
+   VIEWS · GRID · CHAT · ADMIN · TRIGGERS · INIT
+
+   Hidden admin: footer "Studio" link, or 5 clicks on the
+   copyright. Default passphrase: admin123.
+   No price fields exist anywhere — by design.
 ===================================================== */
 (function(){
   'use strict';
-  const KEY = 'bilal_interior_site_v1';
-  const $ = id => document.getElementById(id);
+
+  /* ================= MODULE: STORE ================= */
+  const KEY = 'bilal_interior_spa_v1';
+  const $  = id => document.getElementById(id);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+  const picsum = (seed,w,h) => `https://picsum.photos/seed/${seed}/${w}/${h}.jpg`;
   const icons = () => { if (window.lucide) lucide.createIcons(); };
 
-  /* ---------- WhatsApp glyph (Lucide has no brand icons) ---------- */
   const WA_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>';
 
-  const CATEGORIES = ['3D Spatial Renders', 'Custom Furniture'];
+  const U = (id,w) => `https://images.unsplash.com/${id}?q=80&w=${w||1200}&auto=format&fit=crop`;
 
-  /* ---------- Seed data: initializes localStorage on first run.
-     No price fields exist anywhere in this model — by design. ---------- */
   const DEFAULTS = {
     settings: {
-      logoText: 'Bilal Interior', logoImage: '',
-      whatsapp: '923001234567', email: 'studio@bilalinterior.pk',
-      address: '14-C2, Main Boulevard, Gulberg III, Lahore',
-      hours: 'Mon – Sat · 10:00 – 20:00',
-      password: 'admin123'
+      logoText:'Bilal Interior', logoImage:'',
+      whatsapp:'923001234567', email:'studio@bilalinterior.pk',
+      address:'14-C2, Main Boulevard, Gulberg III, Lahore',
+      hours:'Mon – Sat · 10:00 – 20:00',
+      password:'admin123'
     },
+    categories: [
+      { id:'c1', name:'Beds' },
+      { id:'c2', name:'Sofas' },
+      { id:'c3', name:'Lounge Furniture' },
+      { id:'c4', name:'Bedroom Sets' },
+      { id:'c5', name:'3D Interior Design' }
+    ],
     products: [
-      { id:'p1', title:'Modern Living Room Concept', category:'3D Spatial Renders',
-        image:'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1200&auto=format&fit=crop',
-        description:'A photoreal 3D spatial render for a calm, light-filled lounge — layered neutrals, warm oak flooring and custom low-profile seating around a sculptural coffee table.' },
-      { id:'p2', title:'Commercial Space Layout', category:'3D Spatial Renders',
-        image:'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1200&auto=format&fit=crop',
-        description:'Rendered layout study for a boutique café — zoning for customer flow, banquette seating and warm pendant lighting over the service counter.' },
-      { id:'p3', title:'Denim Upholstered Stool & Cushions', category:'Custom Furniture',
-        image:'https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=1200&auto=format&fit=crop',
-        description:'Hand-built hardwood stool upholstered in heavyweight indigo denim with matching accent cushions — stitch details left proudly exposed for a lived-in, tailored feel.' },
-      { id:'p4', title:'Modern Accent Chair', category:'Custom Furniture',
-        image:'https://images.unsplash.com/photo-1503602642458-232111445657?q=80&w=1200&auto=format&fit=crop',
-        description:'A sculptural accent chair in pale ash with a woven seat — quiet lines and honest joinery that let the material do the talking.' }
+      { id:'p1',  categoryId:'c1', badge:'Bestseller', title:'Aurora Upholstered Bed',        image:U('photo-1505693416388-ac5ce068fe85'), description:'Kiln-dried hardwood frame wrapped in natural linen, with a deep-buttoned headboard and solid oak legs. Made to any width.' },
+      { id:'p2',  categoryId:'c1', badge:'',           title:'Kagenda Oak Platform Bed',      image:U('photo-1519710164239-da123dc03ef4'), description:'A low platform bed in solid oak with an integrated floating night ledge — quiet joinery, zero visible hardware.' },
+      { id:'p3',  categoryId:'c1', badge:'',           title:'Sahil Fluted Headboard Bed',    image:U('photo-1560185007-cde436f6a4d0'),   description:'Fluted walnut headboard panel with integrated reading sconces and a plinth base in honed stone.' },
+      { id:'p4',  categoryId:'c2', badge:'Bestseller', title:'Delft Three-Seater',            image:U('photo-1555041469-a586c61ea9bc'),   description:'Deep-seated three-seater in stone bouclé over kiln-dried beech, feather-blend cushions and fully removable covers.' },
+      { id:'p5',  categoryId:'c2', badge:'',           title:'Marlow Modular Sofa',           image:U('photo-1493663284031-b7e3aefcae8e'), description:'Reconfigurable corner, chaise and ottoman modules — rebuild your lounge as often as you like without tools.' },
+      { id:'p6',  categoryId:'c2', badge:'',           title:'Sable Leather Sofa',            image:U('photo-1540574163026-643ea20ade25'), description:'Full-grain cognac leather that patinas beautifully, saddle-stitched over a hardwood frame with brass feet.' },
+      { id:'p7',  categoryId:'c3', badge:'New',        title:'Oda Lounge Chair',              image:U('photo-1592078615290-033ee584e267'), description:'A sculpted shell chair in warm oatmeal wool with a swivel return — the reading corner, solved.' },
+      { id:'p8',  categoryId:'c3', badge:'',           title:'Pale Ash Accent Chair',         image:U('photo-1503602642458-232111445657'), description:'Hand-woven paper-cord seat on a pale ash frame; honest joinery that lets the material do the talking.' },
+      { id:'p9',  categoryId:'c3', badge:'',           title:'Fireside Armchair & Ottoman',   image:U('photo-1493809842364-78817add7ffb'), description:'Generous proportions, high armrests and a matching footstool — built for long evenings and slower mornings.' },
+      { id:'p10', categoryId:'c4', badge:'Signature',  title:'Cantt Master Suite',            image:U('photo-1567016432779-094069958ea5'), description:'Bed, twin nightstands and dresser composed in walnut and travertine — designed as one continuous gesture.' },
+      { id:'p11', categoryId:'c4', badge:'',           title:'Serene Bedroom Set',            image:U('photo-1616594039964-ae9021a400a0'), description:'Light oak and woven rattan bedroom collection with soft-close joinery throughout and a bench to match.' },
+      { id:'p12', categoryId:'c4', badge:'',           title:'Hotel-Calibre Guest Suite',     image:U('photo-1512918728675-ed5a9ecdebfd'), description:'Compact luxury set with wall-hung side tables and integrated lighting — guest-room comfort, every night.' },
+      { id:'p13', categoryId:'c5', badge:'New',        title:'DHA Villa — Living Concept',    image:U('photo-1616486338812-3dadae4b4ace'), description:'Photoreal spatial render pairing travertine, linen and smoked oak under warm cove lighting, delivered as a walk-through.' },
+      { id:'p14', categoryId:'c5', badge:'',           title:'Boutique Café Layout',          image:U('photo-1554118811-1e0d58224f24'),    description:'Rendered layout study zoning customer flow, banquette seating and pendant light over the service counter.' },
+      { id:'p15', categoryId:'c5', badge:'',           title:'Modern Loft Visualisation',     image:U('photo-1600210492486-724fe5c67fb0'), description:'Full 3D visualisation of an open-plan loft — material boards, lighting plot and camera-ready stills.' },
+      { id:'p16', categoryId:'c5', badge:'',           title:'Fluted Kitchen Study',          image:U('photo-1631679706909-1844bbd07221'), description:'Matte graphite cabinetry against a fluted-oak island, explored in 3D before a single panel is cut.' }
+    ],
+    chat: [
+      { who:'bot', ts:Date.now(), text:'Welcome to Bilal Interior. I can help with furniture, materials and 3D design — or connect you straight to the studio on WhatsApp.' }
     ]
   };
 
-  /* ---------- Persistence ---------- */
+  /* Shop-the-Look hotspots on the hero image: [x%, y%, productId] */
+  const HERO_LOOK = [
+    { x:30, y:62, id:'p4' },
+    { x:62, y:66, id:'p7' },
+    { x:84, y:50, id:'p9' }
+  ];
+
   function loadData(){
     try {
       const raw = JSON.parse(localStorage.getItem(KEY));
       if (raw && typeof raw === 'object') {
         return {
-          settings: { ...DEFAULTS.settings, ...(raw.settings || {}) },
-          products: Array.isArray(raw.products) ? raw.products : JSON.parse(JSON.stringify(DEFAULTS.products))
+          settings:  { ...DEFAULTS.settings, ...(raw.settings||{}) },
+          categories: Array.isArray(raw.categories) ? raw.categories : JSON.parse(JSON.stringify(DEFAULTS.categories)),
+          products:   Array.isArray(raw.products)   ? raw.products   : JSON.parse(JSON.stringify(DEFAULTS.products)),
+          chat:       Array.isArray(raw.chat)       ? raw.chat       : JSON.parse(JSON.stringify(DEFAULTS.chat))
         };
       }
     } catch(e){}
-    return JSON.parse(JSON.stringify(DEFAULTS)); // first run → seed localStorage
+    return JSON.parse(JSON.stringify(DEFAULTS)); // first run → seeds localStorage
   }
   let state = loadData();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('Could not save — browser storage unavailable.'); } };
 
-  /* ---------- Toasts (with optional Undo action) ---------- */
+  const catById   = id => state.categories.find(c => c.id === id);
+  const prodById  = id => state.products.find(p => p.id === id);
+  const catName   = id => (catById(id) || {}).name || 'No category';
+  const catCount  = id => state.products.filter(p => p.categoryId === id).length;
+
+  /* ================= MODULE: UI KIT ================= */
   function toast(msg, opts = {}){
     const box = $('toasts');
     const t = document.createElement('div');
@@ -536,25 +564,29 @@
   const showErr = (el, msg) => { el.textContent = msg; el.classList.remove('hidden'); };
   const hideErr = el => el.classList.add('hidden');
 
-  /* ---------- WhatsApp deep links ---------- */
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting){ en.target.classList.add('revealed'); revealObs.unobserve(en.target); } });
+  }, { threshold:.12, rootMargin:'0px 0px -40px 0px' });
+  const observeReveals = scope => (scope || document).querySelectorAll('[data-reveal]:not(.revealed)').forEach(el => revealObs.observe(el));
+
+  /* ================= MODULE: WHATSAPP ================= */
   const digits = () => String(state.settings.whatsapp).replace(/\D/g, '');
   const waLink = title => `https://wa.me/${digits()}?text=${encodeURIComponent(`Hello Bilal Interior, I am interested in your design: ${title}. Can you provide more details?`)}`;
   const waGeneralLink = () => `https://wa.me/${digits()}?text=${encodeURIComponent('Hello Bilal Interior, I would like to discuss an interior or furniture project.')}`;
 
-  /* ---------- Brand lockup (text + monogram, or image URL) ---------- */
+  /* ================= MODULE: BRAND ================= */
   const VARIANTS = {
-    header: { box:'w-9 h-9 text-base',   text:'text-[21px] tracking-[0.06em]',          img:'h-8 md:h-9 w-auto max-w-[190px] object-contain' },
-    footer: { box:'w-12 h-12 text-xl',   text:'text-4xl md:text-5xl tracking-[0.03em]', img:'h-14 w-auto max-w-[320px] object-contain' },
-    admin:  { box:'w-8 h-8 text-sm',     text:'text-lg tracking-[0.05em]',              img:'h-7 w-auto max-w-[160px] object-contain' }
+    header: { box:'w-9 h-9 text-base', text:'text-[21px] tracking-[0.06em]',          img:'h-8 w-auto max-w-[180px] object-contain' },
+    footer: { box:'w-12 h-12 text-xl', text:'text-4xl md:text-5xl tracking-[0.03em]', img:'h-14 w-auto max-w-[320px] object-contain' },
+    admin:  { box:'w-8 h-8 text-sm',   text:'text-lg tracking-[0.05em]',              img:'h-7 w-auto max-w-[160px] object-contain' }
   };
   function logoMarkup(variant = 'header', over = {}){
     const v = VARIANTS[variant] || VARIANTS.header;
     const s = { ...state.settings, ...over };
-    const ini = ((s.logoText || 'B').trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2) || 'B').toUpperCase();
+    const ini = ((s.logoText || 'B').trim().split(/\s+/).map(w => w[0]).join('').slice(0,2) || 'B').toUpperCase();
     const lockup = `<span class="flex items-center gap-3">
-        <span class="font-serif ${v.box} flex items-center justify-center border-current leading-none" style="border-width:1.5px">${esc(ini)}</span>
-        <span class="font-serif ${v.text} leading-none whitespace-nowrap">${esc(s.logoText)}</span>
-      </span>`;
+      <span class="font-serif ${v.box} flex items-center justify-center border-current leading-none" style="border-width:1.5px">${esc(ini)}</span>
+      <span class="font-serif ${v.text} leading-none whitespace-nowrap">${esc(s.logoText)}</span></span>`;
     if (s.logoImage) {
       return `<span class="flex items-center gap-3">
         <img src="${esc(s.logoImage)}" alt="${esc(s.logoText)}" class="${v.img}"
@@ -566,8 +598,6 @@
   function renderBrand(){
     document.querySelectorAll('.brand-slot').forEach(el => { el.innerHTML = logoMarkup(el.dataset.variant || 'header'); });
   }
-
-  /* ---------- Footer / contact ---------- */
   function renderFooter(){
     const s = state.settings;
     $('footerMark').textContent = s.logoText;
@@ -576,115 +606,440 @@
     const mail = $('fEmail'); mail.textContent = s.email; mail.href = 'mailto:' + s.email;
     $('fAddress').textContent = s.address;
     $('fHours').textContent = s.hours;
+    $('footerCats').innerHTML = state.categories.map(c =>
+      `<li><a href="#/shop/${esc(c.id)}" class="text-cream/70 hover:text-sand transition-colors">${esc(c.name)}</a></li>`).join('') +
+      `<li><a href="#/shop/all" class="text-cream/70 hover:text-sand transition-colors">All Products</a></li>`;
     document.querySelectorAll('.wa-general').forEach(a => a.href = waGeneralLink());
   }
 
-  /* ---------- Scroll reveal ---------- */
-  const revealObs = new IntersectionObserver(entries => {
-    entries.forEach(en => { if (en.isIntersecting){ en.target.classList.add('revealed'); revealObs.unobserve(en.target); } });
-  }, { threshold:.12, rootMargin:'0px 0px -40px 0px' });
-  const observeReveals = scope => (scope || document).querySelectorAll('[data-reveal]:not(.revealed)').forEach(el => revealObs.observe(el));
-
-  /* ---------- Filter tabs (built from CATEGORIES so admin stays in sync) ---------- */
-  let activeFilter = 'all';
-  function renderFilters(){
-    $('filters').innerHTML = ['All', ...CATEGORIES].map(c => {
-      const val = c === 'All' ? 'all' : c;
-      return `<button class="ftab ${activeFilter === val ? 'active' : ''}" data-filter="${esc(val)}">${esc(c)}</button>`;
-    }).join('');
+  /* ================= MODULE: ROUTER ================= */
+  function parseHash(){
+    const h = location.hash.replace(/^#\/?/, '');
+    const [a, b] = h.split('/');
+    if (a === 'shop')    return { view:'shop', param: b || 'all' };
+    if (a === 'about')   return { view:'about' };
+    if (a === 'contact') return { view:'contact' };
+    return { view:'home' };
   }
-  $('filters').addEventListener('click', e => {
-    const btn = e.target.closest('.ftab'); if (!btn) return;
-    activeFilter = btn.dataset.filter;
-    renderFilters();
-    renderGrid();
-  });
+  function renderNav(){
+    const { view, param } = parseHash();
+    const views = [
+      { href:'#/',        label:'Home',      active: view === 'home' },
+      { href:'#/about',   label:'About Us',  active: view === 'about' },
+      { href:'#/contact', label:'Contact Us',active: view === 'contact' }
+    ];
+    const cats = state.categories.map(c => ({ href:`#/shop/${c.id}`, label:c.name, active: view === 'shop' && param === c.id }));
+    const all  = { href:'#/shop/all', label:'All Products', active: view === 'shop' && param === 'all' };
+    const desktop = [...views.slice(0,1), ...cats, all, ...views.slice(1)];
+    $('mainNav').innerHTML = desktop.map(l =>
+      `<a href="${l.href}" class="nav-link ${l.active ? 'active' : ''}">${esc(l.label)}</a>`).join('');
+    $('mobileNav').innerHTML =
+      views.concat(cats, [all]).map(l => `<a href="${l.href}" class="${l.active ? 'text-wood' : ''}">${esc(l.label)}</a>`).join('') +
+      `<a href="#" target="_blank" rel="noopener" class="btn btn-dark btn-sm wa-general mt-2 justify-center"><span class="wa-ic"></span><span>WhatsApp Us</span></a>`;
+  }
+  function renderView(instant){
+    const { view, param } = parseHash();
+    const main = $('view');
+    const swap = () => {
+      const fn = { home:viewHome, shop:viewShop, about:viewAbout, contact:viewContact }[view] || viewHome;
+      main.innerHTML = fn(param);
+      main.classList.remove('vfading');
+      window.scrollTo(0, 0);
+      observeReveals(main);
+      icons();
+    };
+    if (instant){ swap(); return; }
+    main.classList.add('vfading');
+    setTimeout(swap, 190);
+  }
+  function refreshSite(){ renderBrand(); renderFooter(); renderNav(); renderView(true); }
+  window.addEventListener('hashchange', () => { renderNav(); renderView(false); });
 
-  /* ---------- Portfolio grid (asymmetric editorial stagger) ---------- */
-  const PATTERNS = [
-    { span:'md:col-span-7',          aspect:'aspect-[3/2]'   },
-    { span:'md:col-span-5 md:mt-24', aspect:'aspect-[4/5]'   },
-    { span:'md:col-span-5',          aspect:'aspect-[4/5]'   },
-    { span:'md:col-span-7 md:mt-24', aspect:'aspect-[3/2]'   }
-  ];
-  const grid = $('grid');
-
-  function renderGrid(){
-    const items = activeFilter === 'all' ? state.products : state.products.filter(p => p.category === activeFilter);
-    if (!items.length) {
-      grid.innerHTML = `<div class="md:col-span-12 py-24 text-center">
-        <p class="font-serif italic text-3xl text-ink/40">Nothing here yet.</p>
-        <p class="mt-3 text-sm text-ink2">New pieces are added to this collection regularly.</p></div>`;
-      return;
-    }
-    grid.innerHTML = items.map((p, i) => {
-      const pat = PATTERNS[i % 4];
-      return `<article class="group ${pat.span}" data-reveal style="transition-delay:${(i % 4) * 70}ms">
-        <div class="relative cursor-pointer overflow-hidden bg-cream2 ${pat.aspect}" data-qv="${esc(p.id)}" role="button" tabindex="0" aria-label="Quick view: ${esc(p.title)}">
-          <img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy"
-               class="h-full w-full object-cover transition-transform duration-[1300ms] ease-[cubic-bezier(.19,1,.22,1)] group-hover:scale-[1.06]"
-               onerror="this.onerror=null;this.src='https://picsum.photos/seed/bilal-${esc(p.id)}/900/1100.jpg'" />
+  /* ================= MODULE: VIEWS ================= */
+  function viewHome(){
+    const cats = state.categories;
+    const featured = state.products.slice(0, 8);
+    return `
+    <section class="relative h-screen min-h-[640px] overflow-hidden bg-ink">
+      <div class="absolute inset-0 kenburns">
+        <img src="${U('photo-1600585154340-be6161a56a0c',2000)}" alt="Model living room by Bilal Interior" class="w-full h-full object-cover"
+             onerror="this.onerror=null;this.src='${picsum('bilal-hero',1920,1080)}'" />
+      </div>
+      <div class="absolute inset-0 bg-ink/45" aria-hidden="true"></div>
+      <div class="absolute inset-4 lg:inset-6 border border-cream/25 pointer-events-none z-10" aria-hidden="true"></div>
+      ${HERO_LOOK.filter(l => prodById(l.id)).map(l => `
+        <button class="hotspot z-10" style="left:${l.x}%;top:${l.y}%" data-hotspot="${l.id}" aria-label="View ${esc((prodById(l.id)||{}).title||'product')}"></button>`).join('')}
+      <div class="relative z-10 h-full max-w-7xl mx-auto px-8 lg:px-16 flex flex-col justify-end pb-28 lg:pb-32">
+        <p class="fade-up kicker text-sand" style="animation-delay:.05s">Bilal Interior — Furniture, Materials &amp; 3D Design</p>
+        <h1 class="fade-up mt-6 font-serif font-medium text-cream" style="animation-delay:.2s;font-size:clamp(3rem,8.5vw,7rem);line-height:.98">
+          Rooms composed, <em class="italic text-sand">not decorated.</em>
+        </h1>
+        <p class="fade-up mt-6 max-w-xl text-cream/75 text-[16px] leading-relaxed" style="animation-delay:.4s">
+          Tap the markers to shop the look, or browse the full collection — every piece is built to order in our Lahore workshop.</p>
+        <div class="fade-up mt-10 flex flex-wrap gap-4" style="animation-delay:.55s">
+          <a href="#/shop/all" class="btn btn-light">Explore Collection <i data-lucide="arrow-down" class="w-4 h-4"></i></a>
+          <button class="btn btn-ghost" data-look-open><i data-lucide="sparkles" class="w-4 h-4"></i><span>Shop the Look</span></button>
         </div>
-        <div class="mt-6">
-          <p class="kicker text-wood">${esc(p.category)}</p>
-          <h3 class="mt-2 font-serif text-[26px] md:text-3xl leading-snug">${esc(p.title)}</h3>
-          <p class="mt-2 max-w-md text-[15px] leading-relaxed text-ink2">${esc(p.description)}</p>
-          <div class="mt-5 flex flex-wrap items-center gap-4">
-            <a href="${waLink(p.title)}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">${WA_ICON}<span>Inquire on WhatsApp</span></a>
-            <button class="inline-flex items-center gap-1.5 text-[10.5px] tracking-[0.22em] uppercase text-ink/50 hover:text-ink transition-colors" data-qv="${esc(p.id)}">Quick view <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></button>
+      </div>
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 hidden md:flex flex-col items-center gap-3 text-cream/60">
+        <span class="text-[10px] tracking-[0.35em] uppercase">Scroll</span><span class="scroll-line"></span>
+      </div>
+    </section>
+
+    <section class="py-24 lg:py-32">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div class="flex flex-wrap items-end justify-between gap-6" data-reveal>
+          <div><p class="kicker text-wood">Collections</p>
+          <h2 class="mt-4 font-serif text-5xl lg:text-6xl leading-[1.05]">Browse by <em class="italic">room.</em></h2></div>
+          <a href="#/shop/all" class="btn btn-outline btn-sm">View Everything <i data-lucide="arrow-up-right" class="w-4 h-4"></i></a>
+        </div>
+        <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          ${cats.map((c, i) => {
+            const first = state.products.find(p => p.categoryId === c.id);
+            const img = first ? first.image : picsum('cat-' + c.id, 900, 700);
+            return `<a href="#/shop/${esc(c.id)}" class="group relative block overflow-hidden bg-cream2 aspect-[4/3]" data-reveal style="transition-delay:${i*70}ms">
+              <img src="${esc(img)}" alt="${esc(c.name)}" loading="lazy" class="prod-img w-full h-full object-cover"
+                   onerror="this.onerror=null;this.src='${picsum('bilal-'+c.id,900,700)}'" />
+              <div class="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent"></div>
+              <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-3">
+                <div>
+                  <p class="kicker text-sand">${catCount(c.id)} piece${catCount(c.id) === 1 ? '' : 's'}</p>
+                  <h3 class="mt-1 font-serif text-3xl text-cream">${esc(c.name)}</h3>
+                </div>
+                <span class="w-10 h-10 flex-none bg-cream text-ink flex items-center justify-center group-hover:bg-wood group-hover:text-cream transition-colors">
+                  <i data-lucide="arrow-up-right" class="w-4 h-4"></i></span>
+              </div>
+            </a>`;
+          }).join('')}
+        </div>
+      </div>
+    </section>
+
+    <section class="py-24 lg:py-28 border-t border-line">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div class="flex flex-wrap items-end justify-between gap-6" data-reveal>
+          <div><p class="kicker text-wood">Featured</p>
+          <h2 class="mt-4 font-serif text-5xl lg:text-6xl leading-[1.05]">Popular <em class="italic">this season.</em></h2></div>
+        </div>
+        ${gridMarkup(featured)}
+      </div>
+    </section>
+
+    <section class="py-24 lg:py-32 bg-ink text-cream">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10 grid md:grid-cols-3 gap-x-10 gap-y-12">
+        <div class="border-t border-cream/15 pt-8" data-reveal>
+          <span class="font-serif italic text-5xl text-sand">01</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">Furniture Manufacturing</h3>
+          <p class="mt-3 text-sm leading-relaxed text-cream/55">Solid-wood pieces built to order in our own Lahore workshop — from a single chair to a full home of bespoke joinery.</p>
+        </div>
+        <div class="border-t border-cream/15 pt-8" data-reveal style="transition-delay:.1s">
+          <span class="font-serif italic text-5xl text-sand">02</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">Material Procurement</h3>
+          <p class="mt-3 text-sm leading-relaxed text-cream/55">Hardwoods, stone, textiles and hardware — sourced, vetted and sampled for every project.</p>
+        </div>
+        <div class="border-t border-cream/15 pt-8" data-reveal style="transition-delay:.2s">
+          <span class="font-serif italic text-5xl text-sand">03</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">3D Interior Design</h3>
+          <p class="mt-3 text-sm leading-relaxed text-cream/55">Photoreal renders and full spatial layouts — walk through your room before a single plank is cut.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-24 lg:py-32">
+      <div class="max-w-4xl mx-auto px-6 text-center" data-reveal>
+        <p class="kicker text-wood">Ready when you are</p>
+        <h2 class="mt-5 font-serif text-5xl lg:text-6xl leading-[1.05]">Tell us about your <em class="italic">space.</em></h2>
+        <p class="mt-6 text-[16px] leading-relaxed text-ink2">Site visits across Lahore. Render-first design. Quotations handled privately over WhatsApp.</p>
+        <div class="mt-10 flex flex-wrap justify-center gap-4">
+          <a href="#/contact" class="btn btn-dark">Contact Us</a>
+          <a href="#" target="_blank" rel="noopener" class="btn btn-outline wa-general"><span class="wa-ic"></span><span>WhatsApp the Studio</span></a>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  function viewShop(param){
+    if (param !== 'all' && !catById(param)){
+      history.replaceState(null, '', '#/shop/all');
+      return viewShop('all');
+    }
+    const cat = param === 'all' ? null : catById(param);
+    const items = param === 'all' ? state.products : state.products.filter(p => p.categoryId === param);
+    return `
+    <section class="pt-36 pb-20">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div data-reveal>
+          <p class="kicker text-wood">Collection</p>
+          <h1 class="mt-4 font-serif text-6xl lg:text-7xl leading-[1.02]">${cat ? esc(cat.name) : 'All <em class="italic">products</em>'}</h1>
+          <p class="mt-5 max-w-lg text-[15px] leading-relaxed text-ink2">
+            ${items.length} piece${items.length === 1 ? '' : 's'} · made to order · quoted privately on WhatsApp.</p>
+        </div>
+        <div id="shopTabs" class="mt-12 flex gap-x-8 overflow-x-auto no-scrollbar border-b border-line" data-reveal>
+          <a href="#/shop/all" class="ftab ${param === 'all' ? 'active' : ''}">All</a>
+          ${state.categories.map(c => `<a href="#/shop/${esc(c.id)}" class="ftab ${param === c.id ? 'active' : ''}">${esc(c.name)}</a>`).join('')}
+        </div>
+        <div class="mt-16">${gridMarkup(items, true)}</div>
+      </div>
+    </section>`;
+  }
+
+  function viewAbout(){
+    return `
+    <section class="pt-36 pb-16">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div data-reveal>
+          <p class="kicker text-wood">About Us</p>
+          <h1 class="mt-4 font-serif text-6xl lg:text-7xl leading-[1.02] max-w-3xl">A Lahore atelier where <em class="italic">craft</em> meets precision.</h1>
+        </div>
+        <div class="mt-16 grid lg:grid-cols-12 gap-14 items-start">
+          <div class="lg:col-span-6" data-reveal>
+            <p class="text-[17px] leading-relaxed text-ink2">Bilal Interior is a furniture-making and interior design studio working out of Lahore. We build bespoke pieces in our own workshop, source every material ourselves, and translate complete interiors into photoreal 3D visuals before anything is manufactured.</p>
+            <p class="mt-5 text-[17px] leading-relaxed text-ink2">From a single statement chair to a full villa fit-out, every project begins with how you live — and ends with joinery, fabric and light that feel inevitable.</p>
+            <dl class="mt-12 grid grid-cols-3 border-y border-line divide-x divide-line">
+              <div class="py-6 pr-4"><dt class="font-serif text-4xl lg:text-5xl">12<span class="text-wood">+</span></dt><dd class="mt-2 text-[10px] tracking-[0.2em] uppercase text-ink2">Years of practice</dd></div>
+              <div class="py-6 px-4"><dt class="font-serif text-4xl lg:text-5xl">340<span class="text-wood">+</span></dt><dd class="mt-2 text-[10px] tracking-[0.2em] uppercase text-ink2">Projects delivered</dd></div>
+              <div class="py-6 pl-4"><dt class="font-serif text-4xl lg:text-5xl">26</dt><dd class="mt-2 text-[10px] tracking-[0.2em] uppercase text-ink2">Artisans &amp; designers</dd></div>
+            </dl>
+          </div>
+          <div class="lg:col-span-6 relative pb-14" data-reveal style="transition-delay:.12s">
+            <div class="overflow-hidden ml-auto w-[82%] aspect-[4/5] bg-cream2">
+              <img src="${U('photo-1524758631624-e2822e304c36',900)}" alt="Inside the Bilal Interior workshop" class="w-full h-full object-cover"
+                   onerror="this.onerror=null;this.src='${picsum('bilal-about',900,1120)}'" />
+            </div>
+            <div class="absolute bottom-16 left-0 w-[42%] aspect-square overflow-hidden border-[10px] border-cream shadow-[0_24px_60px_rgba(34,29,21,.18)]">
+              <img src="${U('photo-1522708323590-d24dbb6b0267',640)}" alt="Completed interior detail" class="w-full h-full object-cover"
+                   onerror="this.onerror=null;this.src='${picsum('bilal-detail',640,640)}'" />
+            </div>
+            <p class="absolute bottom-0 right-0 text-[10px] tracking-[0.25em] uppercase text-ink/40">The workshop — Gulberg, Lahore</p>
           </div>
         </div>
-      </article>`;
-    }).join('');
-    observeReveals(grid);
-    icons();
+      </div>
+    </section>
+    <section class="py-20 bg-ink text-cream">
+      <div class="max-w-4xl mx-auto px-6 text-center" data-reveal>
+        <p class="font-serif italic text-3xl md:text-4xl leading-snug text-cream/90">"We don't decorate rooms. We compose them — material by material, joint by joint — until the space feels inevitable."</p>
+        <p class="mt-6 kicker text-sand">Bilal — Founder &amp; Principal Designer</p>
+      </div>
+    </section>
+    <section class="py-24">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10 grid md:grid-cols-3 gap-x-10 gap-y-12">
+        <div class="border-t border-line pt-8" data-reveal>
+          <span class="font-serif italic text-5xl text-sand">01</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">Made, not assembled</h3>
+          <p class="mt-3 text-sm leading-relaxed text-ink2">Every piece is cut, joined and finished by our own artisans — nothing drop-shipped, nothing generic.</p>
+        </div>
+        <div class="border-t border-line pt-8" data-reveal style="transition-delay:.1s">
+          <span class="font-serif italic text-5xl text-sand">02</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">Materials first</h3>
+          <p class="mt-3 text-sm leading-relaxed text-ink2">We procure the timber, stone and textile ourselves, so quality is decided at the source — not at the showroom.</p>
+        </div>
+        <div class="border-t border-line pt-8" data-reveal style="transition-delay:.2s">
+          <span class="font-serif italic text-5xl text-sand">03</span>
+          <h3 class="mt-5 text-[12px] tracking-[0.25em] uppercase">See it before it's built</h3>
+          <p class="mt-3 text-sm leading-relaxed text-ink2">Photoreal 3D renders let you walk through and refine the space before manufacturing begins.</p>
+        </div>
+      </div>
+    </section>`;
   }
 
-  /* ---------- Overlays ---------- */
-  const qvOverlay = $('qvOverlay'), loginOverlay = $('loginOverlay'), adminOverlay = $('adminOverlay');
-  const anyOpen = () => [qvOverlay, loginOverlay, adminOverlay].some(o => !o.classList.contains('hidden'));
+  function viewContact(){
+    return `
+    <section class="pt-36 pb-24">
+      <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div data-reveal>
+          <p class="kicker text-wood">Contact Us</p>
+          <h1 class="mt-4 font-serif text-6xl lg:text-7xl leading-[1.02]">Let's talk about <em class="italic">your space.</em></h1>
+        </div>
+        <div class="mt-16 grid lg:grid-cols-12 gap-14">
+          <div class="lg:col-span-5" data-reveal>
+            <p class="text-[16px] leading-relaxed text-ink2 max-w-md">Site visits across Lahore and nearby cities. Send a message here and it opens straight in WhatsApp with your brief pre-filled — the fastest way to reach the studio.</p>
+            <ul class="mt-10 space-y-5 text-[15px]">
+              <li class="flex items-baseline gap-3"><i data-lucide="phone" class="w-4 h-4 text-wood translate-y-[2px]"></i><a id="cPhone" href="#" class="hover:text-wood transition-colors"></a></li>
+              <li class="flex items-baseline gap-3"><i data-lucide="mail" class="w-4 h-4 text-wood translate-y-[2px]"></i><a id="cEmail" href="#" class="hover:text-wood transition-colors"></a></li>
+              <li class="flex items-baseline gap-3"><i data-lucide="map-pin" class="w-4 h-4 text-wood translate-y-[2px]"></i><span class="text-ink2">${esc(state.settings.address)}</span></li>
+              <li class="flex items-baseline gap-3"><i data-lucide="clock" class="w-4 h-4 text-wood translate-y-[2px]"></i><span class="text-ink2">${esc(state.settings.hours)}</span></li>
+            </ul>
+            <a href="#" target="_blank" rel="noopener" class="btn btn-dark wa-general mt-10"><span class="wa-ic"></span><span>Chat on WhatsApp</span></a>
+          </div>
+          <div class="lg:col-span-7" data-reveal style="transition-delay:.1s">
+            <form id="contactForm" class="border border-line bg-white/50 p-8 lg:p-10" novalidate>
+              <div class="grid sm:grid-cols-2 gap-5">
+                <div><label class="flabel" for="cfName">Your name</label><input id="cfName" class="field" placeholder="Full name" /></div>
+                <div><label class="flabel" for="cfPhone">Phone / WhatsApp</label><input id="cfPhone" class="field" placeholder="03001234567" /></div>
+              </div>
+              <div class="mt-5">
+                <label class="flabel" for="cfType">Project type</label>
+                <select id="cfType" class="field">
+                  ${state.categories.map(c => `<option>${esc(c.name)}</option>`).join('')}
+                  <option>Something else</option>
+                </select>
+              </div>
+              <div class="mt-5">
+                <label class="flabel" for="cfMsg">Your brief</label>
+                <textarea id="cfMsg" rows="6" class="field resize-none" placeholder="Rooms, dimensions, timeline, references…"></textarea>
+              </div>
+              <p id="cfErr" class="hidden mt-4 text-[13px] text-clay"></p>
+              <button type="submit" class="btn btn-dark w-full mt-6"><span class="wa-ic"></span><span>Send via WhatsApp</span></button>
+              <p class="mt-3 text-center text-[11px] tracking-[0.15em] uppercase text-ink/40">Opens WhatsApp with your brief pre-filled</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  /* ================= MODULE: PRODUCT GRID ================= */
+  function gridMarkup(items, sparse){
+    if (!items.length){
+      return `<div class="py-24 text-center">
+        <p class="font-serif italic text-3xl text-ink/40">Nothing here yet.</p>
+        <p class="mt-3 text-sm text-ink2">New pieces are added to this collection regularly.</p></div>`;
+    }
+    return `<div class="grid grid-cols-2 lg:grid-cols-4 gap-x-6 lg:gap-x-8 gap-y-12 lg:gap-y-16">
+      ${items.map((p, i) => `
+      <article class="group" data-reveal style="transition-delay:${(i % 4) * 70}ms">
+        <div class="relative overflow-hidden bg-cream2 ${sparse ? 'aspect-[4/5]' : 'aspect-[4/5]'} cursor-pointer" data-qv="${esc(p.id)}" role="button" tabindex="0" aria-label="Quick view: ${esc(p.title)}">
+          <img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" class="prod-img w-full h-full object-cover"
+               onerror="this.onerror=null;this.src='${picsum('bilal-'+p.id,800,1000)}'" />
+          ${p.badge ? `<span class="badge ${p.badge === 'New' ? 'badge-new' : ''}">${esc(p.badge)}</span>` : ''}
+          <span class="qv-pill bg-cream text-ink text-[10px] tracking-[0.2em] uppercase px-4 py-2.5 shadow-lg">Quick view</span>
+        </div>
+        <div class="pt-4">
+          <p class="text-[9.5px] tracking-[0.22em] uppercase text-wood">${esc(catName(p.categoryId))}</p>
+          <h3 class="mt-1.5 font-serif text-xl md:text-[22px] leading-snug">${esc(p.title)}</h3>
+          <p class="mt-1.5 text-[13px] leading-relaxed text-ink2 line-clamp-2 hidden sm:block">${esc(p.description)}</p>
+          <a href="${waLink(p.title)}" target="_blank" rel="noopener"
+             class="mt-3 inline-flex items-center gap-2 border border-ink/25 px-3.5 py-2 text-[10px] tracking-[0.18em] uppercase hover:bg-ink hover:border-ink hover:text-cream transition-all">
+             ${WA_ICON}<span>Inquire on WhatsApp</span></a>
+        </div>
+      </article>`).join('')}
+    </div>`;
+  }
+
+  /* ================= MODULE: OVERLAYS (QV + LOOK) ================= */
+  const qvOverlay = $('qvOverlay'), lookOverlay = $('lookOverlay'), loginOverlay = $('loginOverlay'), adminOverlay = $('adminOverlay');
+  const allOverlays = [qvOverlay, lookOverlay, loginOverlay, adminOverlay];
+  const anyOpen = () => allOverlays.some(o => !o.classList.contains('hidden'));
   function showOverlay(o){ o.classList.remove('hidden'); o.classList.add('flex'); document.body.style.overflow = 'hidden'; }
   function hideOverlay(o){ o.classList.add('hidden'); o.classList.remove('flex'); if (!anyOpen()) document.body.style.overflow = ''; }
 
-  /* Quick view */
   function openQV(id){
-    const p = state.products.find(x => x.id === id); if (!p) return;
+    const p = prodById(id); if (!p) return;
     $('qvImg').src = p.image; $('qvImg').alt = p.title;
-    $('qvCat').textContent = p.category;
+    $('qvImg').onerror = function(){ this.onerror = null; this.src = picsum('bilal-'+p.id, 800, 1000); };
+    $('qvCat').textContent = catName(p.categoryId);
     $('qvTitle').textContent = p.title;
     $('qvDesc').textContent = p.description || 'Made to order — inquire for materials and details.';
     $('qvWa').href = waLink(p.title);
     showOverlay(qvOverlay);
   }
-  grid.addEventListener('click', e => { const t = e.target.closest('[data-qv]'); if (t) openQV(t.dataset.qv); });
-  grid.addEventListener('keydown', e => { if (e.key === 'Enter'){ const t = e.target.closest('[data-qv]'); if (t) openQV(t.dataset.qv); } });
-  qvOverlay.addEventListener('click', e => { if (e.target.closest('[data-qv-close]')) hideOverlay(qvOverlay); });
-
-  /* ---------- Header & mobile menu ---------- */
-  const hdr = $('siteHeader'), menuBtn = $('menuBtn'), mobileMenu = $('mobileMenu');
-  let menuOpen = false;
-  const onScroll = () => hdr.classList.toggle('scrolled', window.scrollY > 50 || menuOpen);
-  window.addEventListener('scroll', onScroll, { passive:true }); onScroll();
-  function setMenu(open){
-    menuOpen = open;
-    mobileMenu.classList.toggle('hidden', !open);
-    menuBtn.innerHTML = `<i data-lucide="${open ? 'x' : 'menu'}" class="w-6 h-6"></i>`;
-    icons(); onScroll();
+  function openLook(){
+    const items = HERO_LOOK.map(l => prodById(l.id)).filter(Boolean);
+    $('lookGrid').innerHTML = items.length ? items.map(p => `
+      <div class="group">
+        <div class="relative overflow-hidden bg-cream2 aspect-square cursor-pointer" data-qv="${esc(p.id)}">
+          <img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" class="prod-img w-full h-full object-cover"
+               onerror="this.onerror=null;this.src='${picsum('bilal-look-'+p.id,600,600)}'" />
+        </div>
+        <p class="mt-3 text-[9.5px] tracking-[0.22em] uppercase text-wood">${esc(catName(p.categoryId))}</p>
+        <h4 class="mt-1 font-serif text-xl leading-snug">${esc(p.title)}</h4>
+        <a href="${waLink(p.title)}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-2 border border-ink/25 px-3.5 py-2 text-[10px] tracking-[0.18em] uppercase hover:bg-ink hover:border-ink hover:text-cream transition-all">
+          ${WA_ICON}<span>Inquire</span></a>
+      </div>`).join('')
+      : `<p class="text-sm text-ink2">The featured pieces are being updated — browse the full collection instead.</p>`;
+    showOverlay(lookOverlay);
+    icons();
   }
-  menuBtn.addEventListener('click', () => setMenu(!menuOpen));
-  mobileMenu.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
 
-  /* ---------- Hidden admin trigger: 5 clicks on the footer copyright ---------- */
-  let cClicks = 0, cTimer = null;
-  $('copyright').addEventListener('click', () => {
-    cClicks++;
-    clearTimeout(cTimer);
-    cTimer = setTimeout(() => cClicks = 0, 2200);
-    if (cClicks === 3) toast('…two more clicks for studio access.');
-    if (cClicks >= 5){ cClicks = 0; openLogin(); }
+  /* ================= MODULE: CHAT ================= */
+  const chatPanel = $('chatPanel'), chatFab = $('chatFab'), chatMsgs = $('chatMsgs');
+  let chatOpenFlag = false;
+
+  const fmtTs = ts => new Date(ts).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  function bubble(m){
+    const mine = m.who === 'me';
+    return `<div class="flex ${mine ? 'justify-end' : 'justify-start'}">
+      <div class="bubble ${mine ? 'bubble-me' : 'bubble-bot'}">${esc(m.text)}
+        <p class="tstamp">${fmtTs(m.ts)}</p></div></div>`;
+  }
+  function renderChat(){
+    chatMsgs.innerHTML = state.chat.map(bubble).join('');
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    updateChatStat();
+  }
+  function pushMsg(who, text){
+    state.chat.push({ who, text, ts: Date.now() });
+    save(); renderChat();
+  }
+  const BOT_RULES = [
+    { re:/(price|cost|rate|budget|charge)/i,  reply:'Every piece is quoted privately — it depends on materials, dimensions and finish. Share what you have in mind and the studio will send a tailored quotation on WhatsApp, usually within a couple of hours.' },
+    { re:/(deliver|ship|transport)/i,         reply:'We deliver across Lahore free of charge, and nationwide via insured freight. Large installations include on-site fitting and styling.' },
+    { re:/(hour|open|close|time|timing)/i,    reply:`The studio is open ${state.settings.hours}. Site visits are by appointment — just ask and we will schedule one.` },
+    { re:/(3d|render|design|plan|layout)/i,   reply:'Our 3D interior design service gives you photoreal renders of your exact room before manufacturing begins. You can refine materials and layout until it feels right, then we build it.' },
+    { re:/(bed|sofa|chair|table|furniture|wardrobe|kitchen)/i, reply:'Beautiful choice of direction. Browse the Collections in the menu — every piece is made to order, and we can adjust size, wood and fabric to your room.' },
+    { re:/(material|wood|fabric|marble|procure)/i, reply:'We handle material procurement in-house: hardwoods, natural stone, textiles and hardware, all sampled and approved with you before production.' },
+    { re:/(hello|hi|hey|salam|assalam)/i,     reply:'Hello, and welcome to Bilal Interior. Are you looking for furniture, a full interior design, or both?' },
+    { re:/(thank|shukriya)/i,                 reply:'With pleasure. Anything else I can help with — materials, dimensions, timelines?' }
+  ];
+  function botReply(userText){
+    setTimeout(() => {
+      $('chatTyping').classList.remove('hidden');
+      if (chatOpenFlag) chatMsgs.scrollTop = chatMsgs.scrollHeight;
+      const rule = BOT_RULES.find(r => r.re.test(userText));
+      const reply = rule ? rule.reply :
+        'Thanks for the message. For detailed help, the studio replies fastest on WhatsApp — tap "Inquire" anywhere on the site, or describe your project here and I will pass it along.';
+      setTimeout(() => {
+        $('chatTyping').classList.add('hidden');
+        pushMsg('bot', reply);
+      }, 900 + Math.random() * 900);
+    }, 450);
+  }
+  function setChat(open){
+    chatOpenFlag = open;
+    chatPanel.classList.toggle('closed', !open);
+    chatFab.setAttribute('aria-label', open ? 'Close chat' : 'Open chat');
+    if (open){
+      if (!state.chat.length){
+        state.chat = JSON.parse(JSON.stringify(DEFAULTS.chat));
+        save();
+      }
+      renderChat();
+      setTimeout(() => $('chatInput').focus(), 250);
+    }
+  }
+  function clearChat(){
+    state.chat = JSON.parse(JSON.stringify(DEFAULTS.chat));
+    save(); renderChat();
+    toast('Conversation history cleared.');
+    updateChatStat();
+  }
+  function updateChatStat(){
+    const el = $('chatStat');
+    if (el) el.textContent = `${state.chat.length} message${state.chat.length === 1 ? '' : 's'} stored on this device.`;
+  }
+
+  chatFab.addEventListener('click', () => setChat(!chatOpenFlag));
+  $('chatClose').addEventListener('click', () => setChat(false));
+  $('chatForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = $('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    pushMsg('me', text);
+    input.value = '';
+    setChat(true);
+    botReply(text);
+  });
+  let clearArm = false, clearTimer = null;
+  $('chatClear').addEventListener('click', () => {
+    if (clearArm){ clearArm = false; clearTimeout(clearTimer); clearChat(); }
+    else {
+      clearArm = true; toast('Click the trash icon again to clear the conversation.');
+      clearTimer = setTimeout(() => clearArm = false, 3000);
+    }
   });
 
-  /* ---------- Login (default passphrase: admin123) ---------- */
+  /* ================= MODULE: ADMIN ================= */
   let fails = 0, lockUntil = 0, lockIv = null;
   const loginBtn = $('loginBtn'), loginPw = $('loginPw'), loginErr = $('loginErr'), loginCard = $('loginCard');
   function openLogin(){ showOverlay(loginOverlay); hideErr(loginErr); setTimeout(() => loginPw.focus(), 80); }
@@ -726,36 +1081,130 @@
     }
   });
 
-  /* ---------- Admin dashboard ---------- */
   function openAdmin(){
     hideOverlay(loginOverlay);
     showOverlay(adminOverlay);
     closeForm();
-    renderAdminList();
+    editingCatId = null;
+    renderCatList();
+    fillCatSelect();
+    renderAdminProdList();
     fillBranding();
-    switchTab('products');
+    updateChatStat();
+    switchTab('categories');
     icons();
   }
-  const closeAdmin = () => hideOverlay(adminOverlay);
-  $('btnViewSite').addEventListener('click', closeAdmin);
-  $('btnLogout').addEventListener('click', () => { closeAdmin(); toast('Logged out of Studio Admin.'); });
-
+  $('btnViewSite').addEventListener('click', () => hideOverlay(adminOverlay));
+  $('btnLogout').addEventListener('click', () => { hideOverlay(adminOverlay); toast('Logged out of Studio Admin.'); });
   function switchTab(name){
-    ['products','branding','security'].forEach(t => {
+    ['categories','products','branding','data'].forEach(t => {
       $('tab-' + t).classList.toggle('hidden', t !== name);
       $('atab-' + t).classList.toggle('active', t === name);
     });
+    icons();
   }
-  $('atab-products').addEventListener('click', () => switchTab('products'));
-  $('atab-branding').addEventListener('click', () => switchTab('branding'));
-  $('atab-security').addEventListener('click', () => switchTab('security'));
+  ['categories','products','branding','data'].forEach(t => $('atab-' + t).addEventListener('click', () => switchTab(t)));
 
-  /* ----- Product management (Title / Category / Image URL / Description ONLY) ----- */
+  /* ----- Category management ----- */
+  let editingCatId = null;
+  const catList = $('catList'), catErr = $('catErr');
+
+  function renderCatList(){
+    catList.innerHTML = state.categories.length ? state.categories.map(c => {
+      if (editingCatId === c.id){
+        return `<div class="py-4 flex items-center gap-3" data-cid="${esc(c.id)}">
+          <input class="field flex-1" data-cinput value="${esc(c.name)}" />
+          <button class="icon-btn" data-cact="save" aria-label="Save"><i data-lucide="check" class="w-4 h-4"></i></button>
+          <button class="icon-btn" data-cact="cancel" aria-label="Cancel"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>`;
+      }
+      const n = catCount(c.id);
+      return `<div class="py-4 flex items-center gap-4" data-cid="${esc(c.id)}">
+        <div class="flex-1 min-w-0">
+          <h4 class="font-serif text-2xl leading-snug truncate">${esc(c.name)}</h4>
+          <p class="text-[12px] text-ink2">${n} product${n === 1 ? '' : 's'} assigned</p>
+        </div>
+        <button class="icon-btn" data-cact="edit" aria-label="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+        <button class="icon-btn" data-cact="del" aria-label="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+      </div>`;
+    }).join('') : `<p class="py-14 text-center text-sm text-ink2">No categories yet — add one above.</p>`;
+    icons();
+  }
+  function fillCatSelect(){
+    $('fCat').innerHTML = state.categories.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('') +
+      `<option value="">— No category —</option>`;
+  }
+  const uniqueName = (name, exceptId) =>
+    !state.categories.some(c => c.name.trim().toLowerCase() === name.toLowerCase() && c.id !== exceptId);
+
+  $('catAddForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = $('catName').value.trim();
+    if (!name) return showErr(catErr, 'Give the category a name.');
+    if (!uniqueName(name)) return showErr(catErr, 'A category with that name already exists.');
+    hideErr(catErr);
+    state.categories.push({ id: uid('c'), name });
+    save(); $('catName').value = '';
+    renderCatList(); fillCatSelect(); refreshSite();
+    toast(`Category "${name}" added — it is now in the navigation.`);
+  });
+
+  catList.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-cact]'); if (!btn) return;
+    const row = btn.closest('[data-cid]');
+    const id = row.dataset.cid;
+    const act = btn.dataset.cact;
+
+    if (act === 'edit'){ editingCatId = id; renderCatList(); row.querySelector('[data-cinput]').focus(); return; }
+    if (act === 'cancel'){ editingCatId = null; renderCatList(); return; }
+    if (act === 'save'){
+      const name = row.querySelector('[data-cinput]').value.trim();
+      if (!name){ toast('Category name cannot be empty.'); return; }
+      if (!uniqueName(name)){ toast('A category with that name already exists.'); return; }
+      catById(id).name = name;
+      editingCatId = null;
+      save(); renderCatList(); fillCatSelect(); refreshSite();
+      toast(`Renamed to "${name}" — live across the site.`);
+      return;
+    }
+    if (act === 'del'){
+      if (btn.classList.contains('armed')){
+        const idx = state.categories.findIndex(c => c.id === id);
+        const [item] = state.categories.splice(idx, 1);
+        const orphaned = state.products.filter(p => p.categoryId === id).length;
+        editingCatId = null;
+        save(); renderCatList(); fillCatSelect(); refreshSite(); renderAdminProdList();
+        toast(`"${item.name}" deleted${orphaned ? ` — ${orphaned} product${orphaned > 1 ? 's' : ''} now uncategorised` : ''}`,
+          { action:{ label:'Undo', fn(){
+              state.categories.splice(Math.min(idx, state.categories.length), 0, item);
+              save(); renderCatList(); fillCatSelect(); refreshSite(); renderAdminProdList();
+              toast('Category restored.');
+          }}});
+      } else {
+        btn.classList.add('armed');
+        btn.innerHTML = 'Delete?';
+        setTimeout(() => {
+          if (!btn.isConnected) return;
+          btn.classList.remove('armed');
+          btn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+          icons();
+        }, 2600);
+      }
+    }
+  });
+  catList.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.matches('[data-cinput]')){
+      e.preventDefault();
+      const row = e.target.closest('[data-cid]');
+      row.querySelector('[data-cact="save"]').click();
+    }
+    if (e.key === 'Escape' && editingCatId){ editingCatId = null; renderCatList(); }
+  });
+
+  /* ----- Product management ----- */
   let editingId = null;
   const prodForm = $('prodForm'), prodList = $('prodList');
   const fTitle = $('fTitle'), fCat = $('fCat'), fImage = $('fImage'), fDesc = $('fDesc'), fPrev = $('fPrev'), formErr = $('formErr');
-
-  fCat.innerHTML = CATEGORIES.map(c => `<option>${esc(c)}</option>`).join('');
 
   function updatePreview(){
     const v = fImage.value.trim();
@@ -767,10 +1216,10 @@
 
   function openForm(id){
     editingId = id || null;
-    const p = id ? state.products.find(x => x.id === id) : null;
-    $('formTitle').textContent = p ? 'Edit item' : 'New item';
+    const p = id ? prodById(id) : null;
+    $('formTitle').textContent = p ? 'Edit product' : 'New product';
     fTitle.value = p ? p.title : '';
-    fCat.value = p ? p.category : CATEGORIES[0];
+    fCat.value = p ? (catById(p.categoryId) ? p.categoryId : '') : (state.categories[0] ? state.categories[0].id : '');
     fImage.value = p ? p.image : '';
     fDesc.value = p ? p.description : '';
     updatePreview();
@@ -794,53 +1243,53 @@
     e.preventDefault();
     const title = fTitle.value.trim();
     if (!title) return showErr(formErr, 'Please give the piece a title.');
-    const image = fImage.value.trim() || `https://picsum.photos/seed/bi-${Date.now().toString(36)}/900/1100`;
-    const data = { title, category: fCat.value, description: fDesc.value.trim(), image };
+    const image = fImage.value.trim() || picsum('bi-' + Date.now().toString(36), 800, 1000);
+    const categoryId = catById(fCat.value) ? fCat.value : '';
+    const data = { title, categoryId, description: fDesc.value.trim(), image };
     if (editingId){
-      Object.assign(state.products.find(p => p.id === editingId), data);
-      toast('Item updated — live on the site.');
+      Object.assign(prodById(editingId), data);
+      toast('Product updated — live on the site.');
     } else {
-      state.products.unshift({ id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,5), ...data });
-      toast('Added to the portfolio.');
+      state.products.unshift({ id: uid('p'), badge:'', ...data });
+      toast('Added to the collection.');
     }
-    save(); renderBrand(); renderGrid(); icons();
-    renderAdminList();
+    save(); renderAdminProdList(); refreshSite();
     closeForm();
   });
 
-  function renderAdminList(){
-    $('prodCount').textContent = `${state.products.length} item${state.products.length === 1 ? '' : 's'} in the portfolio`;
-    prodList.innerHTML = state.products.length ? state.products.map(p => `
-      <div class="flex items-center gap-4 md:gap-6 py-5">
+  function renderAdminProdList(){
+    $('prodCount').textContent = `${state.products.length} product${state.products.length === 1 ? '' : 's'} in the store`;
+    prodList.innerHTML = state.products.length ? state.products.map(p => {
+      const valid = !!catById(p.categoryId);
+      return `<div class="flex items-center gap-4 md:gap-6 py-5">
         <img src="${esc(p.image)}" alt="" class="w-20 h-16 md:w-24 md:h-[70px] object-cover bg-cream2 flex-none"
-             onerror="this.onerror=null;this.src='https://picsum.photos/seed/bilal-fb/200/150.jpg'" />
+             onerror="this.onerror=null;this.src='${picsum('bilal-fb',200,150)}'" />
         <div class="flex-1 min-w-0">
-          <p class="kicker text-wood">${esc(p.category)}</p>
-          <h4 class="font-serif text-xl md:text-2xl leading-snug truncate">${esc(p.title)}</h4>
+          <span class="chip ${valid ? '' : '!border-clay/50 !text-clay'}">${esc(catName(p.categoryId))}</span>
+          <h4 class="mt-1.5 font-serif text-xl md:text-2xl leading-snug truncate">${esc(p.title)}</h4>
           <p class="text-[13px] text-ink2 truncate">${esc(p.description)}</p>
         </div>
         <div class="flex items-center gap-2 flex-none">
           <button class="icon-btn" data-act="edit" data-id="${esc(p.id)}" aria-label="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>
           <button class="icon-btn" data-act="del" data-id="${esc(p.id)}" aria-label="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
         </div>
-      </div>`).join('')
-      : `<p class="py-16 text-center text-sm text-ink2">The portfolio is empty — add your first piece above.</p>`;
+      </div>`;
+    }).join('') : `<p class="py-16 text-center text-sm text-ink2">No products yet — add your first piece above.</p>`;
     icons();
   }
 
   prodList.addEventListener('click', e => {
     const b = e.target.closest('button[data-act]'); if (!b) return;
     if (b.dataset.act === 'edit') return openForm(b.dataset.id);
-    /* two-step delete, with undo */
     if (b.classList.contains('armed')){
       const idx = state.products.findIndex(p => p.id === b.dataset.id);
       if (idx < 0) return;
       const [item] = state.products.splice(idx, 1);
-      save(); renderGrid(); icons(); renderAdminList();
+      save(); renderAdminProdList(); refreshSite();
       toast(`"${item.title}" deleted`, { action:{ label:'Undo', fn(){
         state.products.splice(Math.min(idx, state.products.length), 0, item);
-        save(); renderGrid(); icons(); renderAdminList();
-        toast('Item restored.');
+        save(); renderAdminProdList(); refreshSite();
+        toast('Product restored.');
       }}});
     } else {
       b.classList.add('armed');
@@ -863,7 +1312,6 @@
     $('bAddress').value = s.address;  $('bHours').value = s.hours;
     brandPreview.innerHTML = logoMarkup('header');
   }
-  /* live logo preview while typing */
   ['bLogoText','bLogoImage'].forEach(id => $(id).addEventListener('input', () => {
     brandPreview.innerHTML = logoMarkup('header', {
       logoText: $('bLogoText').value.trim() || 'Bilal Interior',
@@ -882,12 +1330,12 @@
       whatsapp: wt, email: $('bEmail').value.trim(),
       address: $('bAddress').value.trim(), hours: $('bHours').value.trim()
     });
-    save(); renderBrand(); renderFooter(); icons();
+    save(); refreshSite();
     brandPreview.innerHTML = logoMarkup('header');
     toast('Branding updated — live on the site.');
   });
 
-  /* ----- Security ----- */
+  /* ----- Security & data ----- */
   $('pwForm').addEventListener('submit', e => {
     e.preventDefault();
     const err = $('secErr');
@@ -897,9 +1345,18 @@
     if (nw !== cf) return showErr(err, 'New passphrases do not match.');
     hideErr(err);
     state.settings.password = nw;
-    save();
-    $('pwForm').reset();
+    save(); $('pwForm').reset();
     toast('Passphrase updated.');
+  });
+
+  let clearChatArm = false, clearChatTimer = null;
+  $('btnClearChat').addEventListener('click', () => {
+    const b = $('btnClearChat');
+    if (clearChatArm){ clearChatArm = false; clearTimeout(clearChatTimer); clearChat(); b.textContent = 'Clear Chat History'; b.classList.remove('armed'); }
+    else {
+      clearChatArm = true; b.textContent = 'Click again to confirm'; b.classList.add('armed');
+      clearChatTimer = setTimeout(() => { clearChatArm = false; b.textContent = 'Clear Chat History'; b.classList.remove('armed'); }, 3000);
+    }
   });
 
   let resetArm = false, resetTimer = null;
@@ -909,32 +1366,89 @@
       localStorage.removeItem(KEY);
       state = JSON.parse(JSON.stringify(DEFAULTS));
       save();
-      renderBrand(); renderFooter(); renderFilters(); renderGrid(); icons();
-      renderAdminList(); fillBranding();
+      refreshSite();
+      renderCatList(); fillCatSelect(); renderAdminProdList(); fillBranding(); updateChatStat(); renderChat();
       resetArm = false; b.textContent = 'Reset Everything'; b.classList.remove('armed');
       toast('All website data restored to defaults.');
     } else {
       resetArm = true; b.textContent = 'Click again to confirm'; b.classList.add('armed');
-      clearTimeout(resetTimer);
       resetTimer = setTimeout(() => { resetArm = false; b.textContent = 'Reset Everything'; b.classList.remove('armed'); }, 3000);
     }
   });
 
-  /* ---------- Global Escape ---------- */
+  /* ================= MODULE: GLOBAL EVENTS ================= */
+  document.addEventListener('click', e => {
+    const hs = e.target.closest('[data-hotspot]');
+    if (hs){ openQV(hs.dataset.hotspot); return; }
+    if (e.target.closest('[data-look-open]')){ openLook(); return; }
+    if (e.target.closest('[data-look-close]')){ hideOverlay(lookOverlay); return; }
+    const qv = e.target.closest('[data-qv]');
+    if (qv){ openQV(qv.dataset.qv); return; }
+    if (e.target.closest('[data-qv-close]')){ hideOverlay(qvOverlay); return; }
+    if (e.target.closest('.wa-general')) return; // real links handled natively
+  });
   document.addEventListener('keydown', e => {
+    if (e.key === 'Enter'){
+      const t = e.target.closest && e.target.closest('[data-qv]');
+      if (t){ openQV(t.dataset.qv); return; }
+    }
     if (e.key !== 'Escape') return;
     if (!qvOverlay.classList.contains('hidden')) hideOverlay(qvOverlay);
+    else if (!lookOverlay.classList.contains('hidden')) hideOverlay(lookOverlay);
     else if (!loginOverlay.classList.contains('hidden')) hideOverlay(loginOverlay);
-    else if (!adminOverlay.classList.contains('hidden')) closeAdmin();
-    else if (menuOpen) setMenu(false);
+    else if (!adminOverlay.classList.contains('hidden')) hideOverlay(adminOverlay);
+    else if (chatOpenFlag) setChat(false);
+    else if ($('mobileMenu') && !$('mobileMenu').classList.contains('hidden')) setMenu(false);
+  });
+  document.addEventListener('submit', e => {
+    if (e.target.id !== 'contactForm') return;
+    e.preventDefault();
+    const err = $('cfErr');
+    const name = $('cfName').value.trim();
+    const phone = $('cfPhone').value.replace(/\D/g, '');
+    const type = $('cfType').value;
+    const msg = $('cfMsg').value.trim();
+    if (!name) return showErr(err, 'Please add your name.');
+    if (phone.length < 8) return showErr(err, 'Please add a valid phone or WhatsApp number.');
+    if (!msg) return showErr(err, 'Tell us a little about the project.');
+    hideErr(err);
+    const text = `Hello Bilal Interior! I'm ${name}. Project type: ${type}. Brief: ${msg} — You can reply on WhatsApp: +${phone}`;
+    window.open(`https://wa.me/${digits()}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    toast('Opening WhatsApp with your brief pre-filled.');
   });
 
-  /* ---------- Init ---------- */
+  /* Header & mobile menu */
+  const hdr = $('siteHeader'), menuBtn = $('menuBtn'), mobileMenu = $('mobileMenu');
+  let menuOpen = false;
+  const onScroll = () => hdr.classList.toggle('scrolled', window.scrollY > 50 || menuOpen);
+  window.addEventListener('scroll', onScroll, { passive:true }); onScroll();
+  function setMenu(open){
+    menuOpen = open;
+    mobileMenu.classList.toggle('hidden', !open);
+    menuBtn.innerHTML = `<i data-lucide="${open ? 'x' : 'menu'}" class="w-6 h-6"></i>`;
+    icons(); onScroll();
+  }
+  menuBtn.addEventListener('click', () => setMenu(!menuOpen));
+  mobileMenu.addEventListener('click', e => { if (e.target.closest('a')) setMenu(false); });
+
+  /* Hidden admin triggers: footer link + 5 clicks on copyright */
+  let cClicks = 0, cTimer = null;
+  $('copyright').addEventListener('click', () => {
+    cClicks++;
+    clearTimeout(cTimer);
+    cTimer = setTimeout(() => cClicks = 0, 2200);
+    if (cClicks === 3) toast('…two more clicks for studio access.');
+    if (cClicks >= 5){ cClicks = 0; openLogin(); }
+  });
+  $('adminLink').addEventListener('click', openLogin);
+
+  /* ================= MODULE: INIT ================= */
   document.querySelectorAll('.wa-ic').forEach(el => el.innerHTML = WA_ICON);
   renderBrand();
   renderFooter();
-  renderFilters();
-  renderGrid();
+  renderNav();
+  renderView(true);
+  renderChat();
   observeReveals(document);
   icons();
 })();
@@ -942,3 +1456,14 @@
 </body>
 </html>
 ```
+
+**How the architecture works**
+
+- **SPA routing.** Hash-based router (`#/`, `#/shop/all`, `#/shop/<categoryId>`, `#/about`, `#/contact`) with a short fade transition on every view swap. The back/forward buttons work, category links are deep-linkable, and the header nav, mobile menu, and footer links are all generated from live state — renaming "Sofas" to "Modern Sofas" in admin instantly updates every link on the site. If a route points to a deleted category, it silently falls back to All Products.
+- **Shoppable hero.** The hero render carries pulsing hotspot markers mapped to real product IDs (deleted products simply drop their hotspot). "Shop the Look" opens a lookbook modal of the tagged pieces; hotspots jump straight to that product's quick view with the prefilled WhatsApp inquiry.
+- **Chat concierge.** Floating widget with typing indicator, timestamps, keyword-based replies (price → private-quoting explainer, delivery, hours, materials, etc.), and full history persisted to `localStorage` — returning visitors see their previous conversation. Clearing is two-step, both in the widget and in the admin Data tab.
+- **Admin panel.** Opened via the near-invisible "Studio" link in the footer bottom bar (or 5 clicks on the copyright), passphrase `admin123` with a 30-second lockout after 3 failures. **Categories tab:** add, inline-rename (Enter to save, Esc to cancel), and two-step delete — renaming keeps product assignments intact because products reference category *IDs*; deleting orphans its products, which show as "No category" chips in the product list, ready to be reassigned, and the delete is undoable. **Products tab:** Title / Category / Image URL / Description with live image preview. **Branding tab:** logo (text + optional image URL with live preview), WhatsApp number, email, address, hours. **Data tab:** conversation stats, guarded chat clear, passphrase change, and a guarded full reset.
+- **No prices anywhere.** The data model has no price field; cards, quick view, and the lookbook all route quoting to WhatsApp with the exact message *"Hello Bilal Interior, I am interested in your design: [Item Title]. Can you provide more details?"*
+- **Pre-loaded & resilient.** Sixteen seeded products across the five requested categories, every image with an `onerror` picsum fallback, and all mutations written through to `localStorage` (`bilal_interior_spa_v1`) so edits appear on the live site instantly and survive refreshes.
+
+Save as `index.html` and open it — try the hero hotspots, send the concierge a message, then refresh to see the chat history persist, and open the admin via the footer's "Studio" link.
